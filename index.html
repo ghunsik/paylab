@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>월급연구소 - 2026 급여 종합 계산기 | 연봉 실수령액, 퇴직금, 실업급여</title>
+<meta name="description" content="2026년 법령 기준 급여 종합 계산기. 연봉·월급 실수령액, 퇴직금, 실업급여, 연차, 주휴수당, 휴업수당을 정확하게 계산합니다. 4대보험 요율 및 근로기준법 반영.">
+<meta name="keywords" content="2026 연봉계산기, 월급계산기, 실수령액, 퇴직금계산기, 실업급여계산기, 4대보험, 연차계산기, 주휴수당, 최저임금 2026">
+<meta name="author" content="월급연구소">
+<meta property="og:title" content="월급연구소 - 2026 급여 종합 계산기">
+<meta property="og:description" content="2026년 법령 기준 연봉·월급 실수령액, 퇴직금, 실업급여, 연차, 주휴수당 종합 계산기">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="">
+<!-- ============================================================
+     Google AdSense 설정 안내
+     ============================================================
+     1. AdSense 승인 후, 아래 주석을 해제하고 ca-pub-XXXXXXX를 본인 ID로 교체하세요.
+     
+     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+     
+     2. 본 파일 내 "AD-SLOT-HERE" 를 검색하면 광고가 들어갈 위치를 모두 확인할 수 있습니다.
+     3. 각 위치의 주석을 해제하고 data-ad-slot 값을 AdSense에서 발급받은 슬롯 ID로 교체하세요.
+     ============================================================ -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/variable/pretendardvariable.min.css" rel="stylesheet">
+<style>
+:root{--bg:#F7F5F0;--card:#FFF;--sec:#FAFAF7;--g1:#1B4332;--g2:#2D6A4F;--gl:#D8F3DC;--w:#E8985E;--wl:#FFF0E5;--t1:#1A1A1A;--t2:#5A5A5A;--t3:#9A9A9A;--bd:#E8E4DD;--bl:#F0EDE8;--sh:0 4px 12px rgba(0,0,0,.06);--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard Variable',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);line-height:1.6;min-height:100vh}
+
+/* Header */
+.hdr{background:var(--g1);color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(27,67,50,.3)}
+.hdr-in{max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-ic{width:38px;height:38px;background:var(--w);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800}
+.logo-tx{font-size:21px;font-weight:700;letter-spacing:-.5px}.logo-tx span{color:var(--w)}
+.hdr-badge{background:rgba(255,255,255,.15);padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500}
+
+/* Nav */
+.nav{background:#fff;border-bottom:1px solid var(--bd);position:sticky;top:66px;z-index:99;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.nav-in{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.nav-in::-webkit-scrollbar{display:none}
+.ni{padding:12px 14px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:.2s}
+.ni:hover{color:var(--g1);background:var(--gl);border-radius:8px 8px 0 0}.ni.on{color:var(--g1);border-bottom-color:var(--g1);font-weight:600}
+
+/* Main */
+.main{max-width:1200px;margin:0 auto;padding:28px 24px 60px}
+.sp{display:none}.sp.on{display:block;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,var(--g1),#2D6A4F 50%,#40916C);border-radius:18px;padding:36px 32px;color:#fff;margin-bottom:28px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(255,255,255,.05);border-radius:50%}
+.hero h1{font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:8px}
+.hero p{font-size:14px;opacity:.85;line-height:1.7}
+.hero .badges{display:flex;gap:7px;margin-top:16px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.15);padding:5px 12px;border-radius:18px;font-size:11px;font-weight:500}
+
+/* Home Grid */
+.hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:20px}
+.cc{background:var(--card);border-radius:14px;border:1px solid var(--bd);overflow:hidden;transition:.3s;cursor:pointer}
+.cc:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.08);border-color:var(--g2)}
+.ch{padding:14px 18px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.c1 .ch{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);color:#1B5E20}
+.c2 .ch{background:linear-gradient(135deg,#FFF8E1,#FFECB3);color:#E65100}
+.c3 .ch{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);color:#0D47A1}
+.c4 .ch{background:linear-gradient(135deg,#FCE4EC,#F8BBD0);color:#880E4F}
+.c5 .ch{background:linear-gradient(135deg,#F3E5F5,#E1BEE7);color:#4A148C}
+.ci-wrap{padding:10px 18px 14px}
+.ci{padding:9px 10px;font-size:13px;color:var(--t2);border-radius:8px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px}
+.ci:hover{background:var(--sec);color:var(--g1);padding-left:14px}.ci::before{content:'›';color:var(--t3);font-weight:600}.ci:hover::before{color:var(--g1)}
+
+/* Page Elements */
+.pt{font-size:24px;font-weight:700;color:var(--g1);margin-bottom:6px;letter-spacing:-.5px}
+.pd{font-size:13px;color:var(--t2);margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:28px;box-shadow:var(--sh)}
+.st{font-size:15px;font-weight:600;color:var(--g1);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--gl);display:flex;align-items:center;gap:8px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:12px;font-weight:500;color:var(--t2);display:flex;align-items:center;gap:4px}
+.fl .tip{color:var(--t3);cursor:help;font-size:11px;background:var(--bl);width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.fi{padding:11px 12px;border:1px solid var(--bd);border-radius:8px;font-size:14px;font-family:inherit;color:var(--t1);background:var(--sec);transition:.2s;outline:none}
+.fi:focus{border-color:var(--g2);background:#fff;box-shadow:0 0 0 3px rgba(45,106,79,.1)}
+select.fi{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235A5A5A' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.btn{width:100%;padding:14px;background:var(--g1);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:.2s;margin-top:20px;letter-spacing:-.3px}
+.btn:hover{background:var(--g2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(27,67,50,.3)}
+
+/* Results */
+.ra{margin-top:24px;display:none}.ra.show{display:block;animation:fi .4s ease}
+.rh{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border-radius:14px;padding:24px;text-align:center;margin-bottom:18px}
+.rh-l{font-size:13px;opacity:.85;margin-bottom:6px}.rh-v{font-size:32px;font-weight:800;letter-spacing:-1px}.rh-s{font-size:12px;opacity:.7;margin-top:4px}
+.rt{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.rt th{background:var(--sec);padding:10px 14px;font-size:12px;font-weight:600;color:var(--t2);text-align:left;border-bottom:1px solid var(--bd)}
+.rt td{padding:9px 14px;font-size:13px;border-bottom:1px solid var(--bl)}
+.rt tr:last-child td{border-bottom:none}
+.rt .lc{color:var(--t2);width:52%}.rt .vc{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.rt .tr td{background:var(--gl);font-weight:700;color:var(--g1);font-size:14px}
+.rt .sr td{background:#FFF8F0;font-weight:600;color:var(--w)}
+.rn{font-size:11px;color:var(--t3);margin-top:14px;padding:10px 14px;background:var(--sec);border-radius:8px;line-height:1.8}
+.rn strong{color:var(--t2);font-weight:600}
+
+/* Info & Law */
+.seo-note{margin:14px 0 18px}
+.seo-note ul{margin:0;padding-left:18px}
+.seo-note li{margin:2px 0}
+
+.ib{background:var(--wl);border:1px solid #F5D5B5;border-radius:var(--r);padding:14px 18px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start}
+.ib-i{font-size:16px;flex-shrink:0;margin-top:1px}.ib-t{font-size:12px;color:#7A5A3A;line-height:1.7}.ib-t strong{color:#5A3A1A}
+.law{background:#F0F7F4;border:1px solid #C8E6C9;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#2E7D32;line-height:1.7}
+.law strong{font-weight:700}
+.bb{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--t3);cursor:pointer;margin-bottom:14px;padding:5px 10px;border-radius:8px;transition:.15s;border:none;background:none;font-family:inherit}
+.bb:hover{color:var(--g1);background:var(--gl)}
+.changes{font-size:12px;color:var(--t2);line-height:2;padding:8px 14px}
+.changes strong{color:var(--g1)}
+
+/* ===== Ad Slot Styles ===== */
+.ad-slot{background:#FAFAF7;border:1px dashed #D8D4CD;border-radius:var(--r);padding:0;margin:20px 0;min-height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.ad-slot-top{margin:0 0 24px 0;min-height:90px}
+.ad-slot-mid{margin:24px 0;min-height:250px}
+.ad-slot-bottom{margin:24px 0 0 0;min-height:90px}
+.ad-slot-side{min-height:600px;position:sticky;top:140px}
+/* 광고가 로드되기 전 플레이스홀더 */
+.ad-placeholder{font-size:11px;color:#C0B8A8;text-align:center;padding:20px}
+
+/* Two column layout with side ad */
+.content-with-ad{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start}
+.content-main{min-width:0}
+.content-side{display:flex;flex-direction:column;gap:16px}
+
+/* Footer */
+.ft{max-width:1200px;margin:0 auto;padding:24px;text-align:center;color:var(--t3);font-size:11px;border-top:1px solid var(--bd)}
+.ft a{color:var(--g2);text-decoration:none}.ft a:hover{text-decoration:underline}
+.ft-links{display:flex;justify-content:center;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+
+/* Privacy / Terms Pages */
+.legal-content{max-width:800px;margin:0 auto;font-size:13px;color:var(--t2);line-height:2}
+.legal-content h2{font-size:18px;color:var(--g1);margin:28px 0 12px;font-weight:700}
+.legal-content h3{font-size:15px;color:var(--t1);margin:20px 0 8px;font-weight:600}
+.legal-content p{margin-bottom:12px}
+.legal-content ul{padding-left:20px;margin-bottom:12px}
+.legal-content li{margin-bottom:6px}
+
+/* Responsive */
+@media(max-width:900px){
+  .content-with-ad{grid-template-columns:1fr}
+  .content-side{display:none}
+  .ad-slot-side{display:none}
+}
+@media(max-width:768px){
+  .hdr-in{padding:10px 14px}.logo-tx{font-size:17px}.hdr-badge{display:none}
+  .ni{padding:10px 12px;font-size:12px}.main{padding:18px 14px 36px}
+  .hg{grid-template-columns:1fr}.hero{padding:24px 20px}.hero h1{font-size:22px}
+  .card{padding:20px 16px}.fr{grid-template-columns:1fr}.rh-v{font-size:26px}.pt{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr"><div class="hdr-in">
+  <div class="logo" onclick="go('home')"><div class="logo-ic">W</div><div class="logo-tx">월급<span>연구소</span></div></div>
+  <div class="hdr-badge">2026년 법령 기준</div>
+</div></header>
+
+<!-- Nav -->
+<nav class="nav"><div class="nav-in">
+  <div class="ni on" data-s="home">🏠 홈</div>
+  <div class="ni" data-s="annual">💰 연봉</div>
+  <div class="ni" data-s="monthly">📋 월급</div>
+  <div class="ni" data-s="hourly">⏰ 시급</div>
+  <div class="ni" data-s="severance">📦 퇴직금</div>
+  <div class="ni" data-s="unemployment">🔎 실업급여</div>
+  <div class="ni" data-s="leave">🌴 연차</div>
+  <div class="ni" data-s="weekly">📅 주휴수당</div>
+  <div class="ni" data-s="shutdown">🏭 휴업수당</div>
+</div></nav>
+
+<!-- Main -->
+<main class="main">
+
+<!-- ============================== HOME ============================== -->
+<div class="sp on" id="s-home">
+<div class="hero">
+  <h1>2026 급여 종합 계산기</h1>
+  <p>근로기준법, 고용보험법, 국민연금법 등 2026년 개정 법령을 반영한 정확한 급여 계산을 제공합니다.</p>
+  <div class="badges">
+    <span class="badge">최저시급 10,320원</span>
+    <span class="badge">국민연금 9.5%</span>
+    <span class="badge">건강보험 7.19%</span>
+    <span class="badge">장기요양 13.14%</span>
+    <span class="badge">고용보험 1.8%</span>
+  </div>
+</div>
+
+<!-- AD-SLOT-HERE: 홈 상단 배너 (728x90 리더보드) -->
+<div class="ad-slot ad-slot-top">
+  <div class="ad-placeholder">
+    <!-- AdSense 승인 후 아래 주석 해제 & data-ad-slot 교체
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    -->
+    광고 영역
+  </div>
+</div>
+
+<div class="hg">
+  <div class="cc c1"><div class="ch"><span>💰</span>급여 계산</div><div class="ci-wrap">
+    <div class="ci" onclick="go('annual')">연봉 실수령액 계산기</div>
+    <div class="ci" onclick="go('monthly')">월급 실수령액 계산기</div>
+    <div class="ci" onclick="go('hourly')">시급 / 최저임금 계산기</div>
+  </div></div>
+  <div class="cc c3"><div class="ch"><span>📦</span>퇴사 / 퇴직</div><div class="ci-wrap">
+    <div class="ci" onclick="go('severance')">퇴직금 계산기</div>
+    <div class="ci" onclick="go('unemployment')">실업급여(구직급여) 계산기</div>
+  </div></div>
+  <div class="cc c4"><div class="ch"><span>🌴</span>휴가 / 수당</div><div class="ci-wrap">
+    <div class="ci" onclick="go('leave')">연차 발생일수 계산기</div>
+    <div class="ci" onclick="go('weekly')">주휴수당 계산기</div>
+    <div class="ci" onclick="go('shutdown')">휴업수당 계산기</div>
+  </div></div>
+  <div class="cc c5"><div class="ch"><span>📊</span>2026년 주요 변경사항</div><div class="ci-wrap">
+    <div class="changes">
+      • 국민연금: 9% → <strong>9.5%</strong> <em>— 국민연금법 시행령</em><br>
+      • 건강보험: 7.09% → <strong>7.19%</strong> <em>— 국민건강보험법</em><br>
+      • 장기요양: 12.95% → <strong>13.14%</strong> <em>— 노인장기요양보험법</em><br>
+      • 고용보험: <strong>1.8%</strong> <em>— 고용보험법</em><br>
+      • 최저시급: 10,030원 → <strong>10,320원</strong> <em>— 고용노동부 고시 2025-47호</em><br>
+      • 실업급여 상한액: 66,000 → <strong>68,100원</strong>/일<br>
+      • 임금체불 처벌: <strong>5년 이하 징역</strong> <em>— 근로기준법 개정</em><br>
+      • 근로자의 날 → <strong>노동절</strong> 명칭 변경
+    </div>
+  </div></div>
+</div>
+
+<!-- AD-SLOT-HERE: 홈 하단 배너 -->
+<div class="ad-slot ad-slot-bottom">
+  <div class="ad-placeholder">
+    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+    광고 영역
+  </div>
+</div>
+</div>
+
+<!-- ============================== ANNUAL ============================== -->
+<div class="sp" id="s-annual">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">연봉 실수령액 계산기</div>
+<div class="pd">연봉에서 4대보험 + 소득세를 공제한 월 실수령액을 계산합니다.</div>
+
+<div class="ib seo-note" data-seo-note="1">
+  <div class="ib-i">✅</div>
+  <div class="ib-t">
+    <strong>연봉 계산기 계산 기준(요약)</strong>
+    <ul style="margin-top:8px">
+      <li>과세대상 = (연봉/12) - 비과세액(월)</li>
+      <li>4대보험은 2026년 기준 요율로 근사 계산(상·하한/정산 차이는 미반영 가능)</li>
+      <li>소득세는 근로소득 간이세액표 기반의 근사치(가족/자녀 공제 반영)</li>
+      <li>지방소득세 = 소득세의 10%</li>
+    </ul>
+    <div style="margin-top:8px; font-size:12px; color:#7A5A3A; line-height:1.7;">정확한 공제액은 회사 급여명세서/연말정산 결과와 다를 수 있습니다.</div>
+  </div>
+</div>
+<!-- AD-SLOT-HERE: 계산기 상단 -->
+<div class="ad-slot ad-slot-top">
+  <div class="ad-placeholder"><!-- AdSense 코드 삽입 위치 -->광고 영역</div>
+</div>
+
+<div class="content-with-ad">
+<div class="content-main">
+<div class="law"><strong>📖 법적 근거</strong><br>
+• 국민연금법 시행령 — 근로자 4.75% (총 9.5%)<br>
+• 국민건강보험법 시행령 — 근로자 3.595% (총 7.19%)<br>
+• 노인장기요양보험법 — 건강보험료의 13.14%<br>
+• 고용보험법 시행령 — 근로자 0.9%<br>
+• 소득세법 시행령 별표 2 — 근로소득 간이세액표<br>
+• 지방세법 제92조 — 소득세의 10%</div>
+<div class="card">
+  <div class="st">📝 급여 정보 입력</div>
+  <div class="fr"><div class="fg"><label class="fl">연봉 (세전, 원)</label><input class="fi" id="a-sal" placeholder="예: 40,000,000" oninput="fmt(this)"></div>
+  <div class="fg"><label class="fl">비과세액 (월) <span class="tip" title="식대 20만원 등">?</span></label><input class="fi" id="a-nt" value="200,000" oninput="fmt(this)"></div></div>
+  <div class="fr"><div class="fg"><label class="fl">부양가족 수 (본인 포함)</label><select class="fi" id="a-fm"><option value="1" selected>1명 (본인만)</option><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명</option><option value="6">6명 이상</option></select></div>
+  <div class="fg"><label class="fl">20세 이하 자녀 수</label><select class="fi" id="a-ch"><option value="0" selected>없음</option><option value="1">1명</option><option value="2">2명</option><option value="3">3명 이상</option></select></div></div>
+  <button class="btn" onclick="calcA()">실수령액 계산하기</button>
+  <div class="ra" id="r-a"><div class="rh"><div class="rh-l">월 예상 실수령액</div><div class="rh-v" id="ra-v"></div><div class="rh-s" id="ra-s"></div></div>
+  <table class="rt"><thead><tr><th colspan="2">공제 내역 (월 기준)</th></tr></thead><tbody id="ra-t"></tbody></table>
+
+  <!-- AD-SLOT-HERE: 결과 하단 (인아티클) -->
+  <div class="ad-slot ad-slot-mid" style="margin-top:20px">
+    <div class="ad-placeholder"><!-- AdSense 코드 삽입 위치 -->광고 영역</div>
+  </div>
+
+  <div class="rn"><strong>※ 참고사항</strong><br>• 소득세는 간이세액표 근사치이며 연말정산 결과와 차이 가능<br>• 국민연금 상한액(590만원)/하한액(39만원) 미반영<br>• 비과세 식대 월 20만원 한도 (소득세법 §12)</div></div>
+</div>
+</div>
+
+<!-- Side Ad -->
+<div class="content-side">
+  <div class="ad-slot ad-slot-side">
+    <div class="ad-placeholder">
+      <!-- AD-SLOT-HERE: 사이드바 (300x600 하프페이지)
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="vertical" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+      광고 영역
+    </div>
+  </div>
+</div>
+</div><!-- content-with-ad -->
+</div>
+
+<!-- ============================== MONTHLY ============================== -->
+<div class="sp" id="s-monthly">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">월급 실수령액 계산기</div>
+<div class="pd">월 급여(세전)에서 공제 후 실수령액을 산출합니다.</div>
+<div class="ib seo-note" data-seo-note="1">
+  <div class="ib-i">✅</div>
+  <div class="ib-t">
+    <strong>월급 계산기 계산 기준(요약)</strong>
+    <ul style="margin-top:8px">
+      <li>과세대상 = 월급(세전) - 비과세액(월)</li>
+      <li>4대보험은 2026년 요율 기준 근사 계산</li>
+      <li>소득세는 가족/자녀 공제 기준 근사 계산</li>
+      <li>지방소득세 = 소득세의 10%</li>
+    </ul>
+    <div style="margin-top:8px; font-size:12px; color:#7A5A3A; line-height:1.7;">상·하한액(국민연금 등), 정산분, 회사별 공제 방식에 따라 실제와 차이가 날 수 있습니다.</div>
+  </div>
+</div>
+<div class="ad-slot ad-slot-top"><div class="ad-placeholder">광고 영역</div></div>
+<div class="content-with-ad"><div class="content-main">
+<div class="law"><strong>📖 법적 근거</strong> — 연봉 계산기와 동일한 4대보험법 및 소득세법 적용</div>
+<div class="card">
+  <div class="st">📝 급여 정보 입력</div>
+  <div class="fr"><div class="fg"><label class="fl">월급 (세전)</label><input class="fi" id="m-sal" placeholder="예: 3,500,000" oninput="fmt(this)"></div>
+  <div class="fg"><label class="fl">비과세액 (월)</label><input class="fi" id="m-nt" value="200,000" oninput="fmt(this)"></div></div>
+  <div class="fr"><div class="fg"><label class="fl">부양가족 수</label><select class="fi" id="m-fm"><option value="1" selected>1명</option><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명</option></select></div>
+  <div class="fg"><label class="fl">20세 이하 자녀 수</label><select class="fi" id="m-ch"><option value="0" selected>없음</option><option value="1">1명</option><option value="2">2명</option><option value="3">3명</option></select></div></div>
+  <button class="btn" onclick="calcM()">실수령액 계산하기</button>
+  <div class="ra" id="r-m"><div class="rh"><div class="rh-l">월 예상 실수령액</div><div class="rh-v" id="rm-v"></div><div class="rh-s" id="rm-s"></div></div>
+  <table class="rt"><thead><tr><th colspan="2">공제 내역</th></tr></thead><tbody id="rm-t"></tbody></table>
+  <div class="ad-slot ad-slot-mid"><div class="ad-placeholder">광고 영역</div></div>
+  <div class="rn"><strong>※</strong> 근사 계산이며 실제 공제액과 차이가 있을 수 있습니다.</div></div>
+</div>
+</div><div class="content-side"><div class="ad-slot ad-slot-side"><div class="ad-placeholder">광고 영역</div></div></div>
+</div></div>
+
+<!-- ============================== HOURLY ============================== -->
+<div class="sp" id="s-hourly">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">시급 / 최저임금 계산기</div>
+<div class="pd">시급 기준 일급·월급 산출 및 최저임금 준수 여부를 확인합니다.</div>
+<div class="ib seo-note" data-seo-note="1">
+  <div class="ib-i">✅</div>
+  <div class="ib-t">
+    <strong>시급 계산기 계산 기준(요약)</strong>
+    <ul style="margin-top:8px">
+      <li>일급 = 시급 × 1일 근무시간</li>
+      <li>주급 = 일급 × 주 근무일수</li>
+      <li>주휴수당은 ‘주 15시간 이상 & 소정근로일 개근’ 전제에서만 산정</li>
+      <li>월 환산은 일반적인 ‘주 단위 급여 → 월 환산’ 방식으로 근사</li>
+    </ul>
+    <div style="margin-top:8px; font-size:12px; color:#7A5A3A; line-height:1.7;">사업장 운영 방식(주 단위/월 단위), 휴게시간, 수습 감액 여부에 따라 달라질 수 있습니다.</div>
+  </div>
+</div>
+<div class="ad-slot ad-slot-top"><div class="ad-placeholder">광고 영역</div></div>
+<div class="content-with-ad"><div class="content-main">
+<div class="law"><strong>📖 법적 근거</strong><br>
+• 최저임금법 §5, 고용노동부 고시 제2025-47호 — 시간급 10,320원<br>
+• 월 환산 2,156,880원 (주40h, 월 209h)<br>
+• 최저임금법 §5의2 — 수습 3개월 이내 90% 감액 가능<br>
+• 근로기준법 §55 — 주휴일 부여 의무</div>
+<div class="card">
+  <div class="st">📝 근무 정보</div>
+  <div class="fr"><div class="fg"><label class="fl">시급 (원)</label><input class="fi" id="h-w" value="10,320" oninput="fmt(this)"></div>
+  <div class="fg"><label class="fl">일 근무시간</label><select class="fi" id="h-h"><option value="4">4시간</option><option value="5">5시간</option><option value="6">6시간</option><option value="7">7시간</option><option value="8" selected>8시간</option><option value="9">9시간</option><option value="10">10시간</option></select></div></div>
+  <div class="fr"><div class="fg"><label class="fl">주 근무일수</label><select class="fi" id="h-d"><option value="1">1일</option><option value="2">2일</option><option value="3">3일</option><option value="4">4일</option><option value="5" selected>5일</option><option value="6">6일</option></select></div>
+  <div class="fg"><label class="fl">주휴수당 포함</label><select class="fi" id="h-wk"><option value="1" selected>포함 (주15h이상)</option><option value="0">미포함</option></select></div></div>
+  <button class="btn" onclick="calcH()">급여 계산하기</button>
+  <div class="ra" id="r-h"><div class="rh"><div class="rh-l">월 예상 급여 (세전)</div><div class="rh-v" id="rh-v"></div><div class="rh-s" id="rh-s"></div></div>
+  <table class="rt"><thead><tr><th colspan="2">급여 산출</th></tr></thead><tbody id="rh-t"></tbody></table>
+  <div class="ad-slot ad-slot-mid"><div class="ad-placeholder">광고 영역</div></div>
+  <div class="rn"><strong>※</strong> 주휴수당: 근로기준법 §55, 주 15h 이상 & 소정근로일 개근 시 발생</div></div>
+</div>
+</div><div class="content-side"><div class="ad-slot ad-slot-side"><div class="ad-placeholder">광고 영역</div></div></div>
+</div></div>
+
+<!-- ============================== SEVERANCE ============================== -->
+<div class="sp" id="s-severance">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">퇴직금 계산기</div>
+<div class="pd">근로자퇴직급여 보장법에 따른 퇴직금을 계산합니다.</div>
+<div class="ib seo-note" data-seo-note="1">
+  <div class="ib-i">✅</div>
+  <div class="ib-t">
+    <strong>퇴직금 계산기 계산 기준(요약)</strong>
+    <ul style="margin-top:8px">
+      <li>평균임금 = 퇴직 전 3개월 임금총액 ÷ 3개월 총일수(역일수)</li>
+      <li>퇴직금 = 1일 평균임금 × 30 × (재직일수 ÷ 365)</li>
+      <li>상여금/연차수당은 3/12 비율로 평균임금에 가산(입력값 기반)</li>
+    </ul>
+    <div style="margin-top:8px; font-size:12px; color:#7A5A3A; line-height:1.7;">정확한 산정은 통상임금/평균임금 비교, 제외기간(휴직 등) 여부에 따라 달라질 수 있습니다.</div>
+  </div>
+</div>
+<div class="ad-slot ad-slot-top"><div class="ad-placeholder">광고 영역</div></div>
+<div class="content-with-ad"><div class="content-main">
+<div class="law"><strong>📖 법적 근거</strong><br>
+• 퇴직급여보장법 §8 — 1년 근속당 30일분 평균임금<br>
+• 근로기준법 §2①⑥ — 평균임금 = 3개월 임금총액 ÷ 총일수<br>
+• 근로기준법 §2② — 평균임금 &lt; 통상임금 시 통상임금 적용<br>
+• 퇴직급여보장법 §9 — 퇴직 후 14일 이내 지급</div>
+<div class="card">
+  <div class="st">📝 근무 정보</div>
+  <div class="fr"><div class="fg"><label class="fl">입사일</label><input type="date" class="fi" id="sv-s"></div>
+  <div class="fg"><label class="fl">퇴사일</label><input type="date" class="fi" id="sv-e"></div></div>
+  <div class="st" style="margin-top:20px">💵 최근 3개월 임금</div>
+  <div class="fr"><div class="fg"><label class="fl">월 기본급</label><input class="fi" id="sv-b" placeholder="예: 3,000,000" oninput="fmt(this)"></div>
+  <div class="fg"><label class="fl">월 기타수당</label><input class="fi" id="sv-a" value="0" oninput="fmt(this)"></div></div>
+  <div class="fr"><div class="fg"><label class="fl">연간 상여금 총액</label><input class="fi" id="sv-bn" value="0" oninput="fmt(this)"></div>
+  <div class="fg"><label class="fl">연차수당 (미사용분)</label><input class="fi" id="sv-al" value="0" oninput="fmt(this)"></div></div>
+  <button class="btn" onclick="calcSv()">퇴직금 계산하기</button>
+  <div class="ra" id="r-sv"><div class="rh"><div class="rh-l">예상 퇴직금</div><div class="rh-v" id="rsv-v"></div><div class="rh-s" id="rsv-s"></div></div>
+  <table class="rt"><thead><tr><th colspan="2">퇴직금 산출</th></tr></thead><tbody id="rsv-t"></tbody></table>
+  <div class="ad-slot ad-slot-mid"><div class="ad-placeholder">광고 영역</div></div>
+  <div class="rn"><strong>※</strong> 퇴직금 = 1일 평균임금 × 30 × (재직일수 ÷ 365)<br><strong>※</strong> 상여금·연차수당은 3/12 비율로 가산</div></div>
+</div>
+</div><div class="content-side"><div class="ad-slot ad-slot-side"><div class="ad-placeholder">광고 영역</div></div></div>
+</div></div>
+
+<!-- ============================== UNEMPLOYMENT ============================== -->
+<div class="sp" id="s-unemployment">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">실업급여(구직급여) 계산기</div>
+<div class="pd">퇴직 전 평균임금 기반으로 예상 구직급여를 산출합니다.</div>
+<div class="ib seo-note" data-seo-note="1">
+  <div class="ib-i">✅</div>
+  <div class="ib-t">
+    <strong>실업급여 계산기 계산 기준(요약)</strong>
+    <ul style="margin-top:8px">
+      <li>기초일액은 ‘퇴직 전 평균임금’ 기반으로 근사</li>
+      <li>1일 구직급여 = 기초일액 × 60% (상·하한액 범위 적용)</li>
+      <li>소정급여일수는 연령/피보험기간에 따라 120~270일</li>
+    </ul>
+    <div style="margin-top:8px; font-size:12px; color:#7A5A3A; line-height:1.7;">반복수급, 자발적 퇴사 사유, 대기기간 등 실제 지급 조건은 관할 고용센터 안내를 확인하세요.</div>
+  </div>
+</div>
+<div class="ad-slot ad-slot-top"><div class="ad-placeholder">광고 영역</div></div>
+<div class="content-with-ad"><div class="content-main">
+<div class="law"><strong>📖 법적 근거</strong><br>
+• 고용보험법 §45 — 기초일액 = 퇴직 전 평균임금<br>
+• 고용보험법 §46 — 구직급여일액 = 기초일액 × 60%<br>
+• 고용보험법 시행령 §68 — 상한액 68,100원/일<br>
+• 하한액 66,048원/일 (최저임금 80%×8h)<br>
+• 고용보험법 §50 — 소정급여일수 120~270일</div>
+<div class="card">
+  <div class="st">📝 이직 정보</div>
+  <div class="fr"><div class="fg"><label class="fl">퇴직 전 3개월 월평균 급여</label><input class="fi" id="ue-sal" placeholder="예: 3,000,000" oninput="fmt(this)"></div>
+  <div class="fg"><label class="fl">퇴직 시 연령</label><select class="fi" id="ue-age"><option value="u50" selected>50세 미만</option><option value="o50">50세 이상 / 장애인</option></select></div></div>
+  <div class="fr"><div class="fg"><label class="fl">고용보험 피보험기간</label><select class="fi" id="ue-per"><option value="1">1년 미만</option><option value="3" selected>1~3년 미만</option><option value="5">3~5년 미만</option><option value="10">5~10년 미만</option><option value="99">10년 이상</option></select></div>
+  <div class="fg"><label class="fl">최근 3개월 총 일수</label><input class="fi" id="ue-days" value="92"></div></div>
+  <button class="btn" onclick="calcUe()">실업급여 계산하기</button>
+  <div class="ra" id="r-ue"><div class="rh"><div class="rh-l">1일 구직급여액</div><div class="rh-v" id="rue-v"></div><div class="rh-s" id="rue-s"></div></div>
+  <table class="rt"><thead><tr><th colspan="2">구직급여 산출</th></tr></thead><tbody id="rue-t"></tbody></table>
+  <div class="ad-slot ad-slot-mid"><div class="ad-placeholder">광고 영역</div></div>
+  <div class="rn"><strong>※</strong> 반복수급자(5년 내 3회+) 감액 적용 가능<br><strong>※</strong> 퇴직일로부터 12개월 이내 신청 필수</div></div>
+</div>
+</div><div class="content-side"><div class="ad-slot ad-slot-side"><div class="ad-placeholder">광고 영역</div></div></div>
+</div></div>
+
+<!-- ============================== LEAVE ============================== -->
+<div class="sp" id="s-leave">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">연차 발생일수 계산기</div>
+<div class="pd">입사일 기준 연차 유급휴가 발생일수를 산출합니다.</div>
+<div class="ib seo-note" data-seo-note="1">
+  <div class="ib-i">✅</div>
+  <div class="ib-t">
+    <strong>연차 계산기 계산 기준(요약)</strong>
+    <ul style="margin-top:8px">
+      <li>1년 미만: 1개월 개근 시 1일(최대 11일) 근사</li>
+      <li>1년 이상: 출근율 80% 이상 가정 시 15일</li>
+      <li>3년 이상: 2년마다 1일 가산(최대 25일)</li>
+    </ul>
+    <div style="margin-top:8px; font-size:12px; color:#7A5A3A; line-height:1.7;">실제 연차는 출근율, 육아휴직/휴직, 회사 취업규칙 등에 의해 달라질 수 있습니다.</div>
+  </div>
+</div>
+<div class="ad-slot ad-slot-top"><div class="ad-placeholder">광고 영역</div></div>
+<div class="content-with-ad"><div class="content-main">
+<div class="law"><strong>📖 법적 근거</strong><br>
+• 근로기준법 §60① — 1년 80%+ 출근 시 15일<br>
+• §60② — 1년 미만: 월 1일 (최대 11일)<br>
+• §60④ — 3년+ 근속 시 매 2년마다 +1일 (최대 25일)<br>
+• §60⑦ — 미사용 연차수당 지급 의무</div>
+<div class="card">
+  <div class="st">📝 입사 정보</div>
+  <div class="fr"><div class="fg"><label class="fl">입사일</label><input type="date" class="fi" id="lv-s"></div>
+  <div class="fg"><label class="fl">기준일</label><input type="date" class="fi" id="lv-e"></div></div>
+  <button class="btn" onclick="calcLv()">연차 계산하기</button>
+  <div class="ra" id="r-lv"><div class="rh"><div class="rh-l">현재 연차 발생일수</div><div class="rh-v" id="rlv-v"></div><div class="rh-s" id="rlv-s"></div></div>
+  <table class="rt"><thead><tr><th colspan="2">연차 발생 내역</th></tr></thead><tbody id="rlv-t"></tbody></table>
+  <div class="ad-slot ad-slot-mid"><div class="ad-placeholder">광고 영역</div></div>
+  <div class="rn"><strong>※</strong> 80% 이상 출근 전제</div></div>
+</div>
+</div><div class="content-side"><div class="ad-slot ad-slot-side"><div class="ad-placeholder">광고 영역</div></div></div>
+</div></div>
+
+<!-- ============================== WEEKLY ============================== -->
+<div class="sp" id="s-weekly">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">주휴수당 계산기</div>
+<div class="pd">주 15시간 이상 근무 시 발생하는 주휴수당을 산출합니다.</div>
+<div class="ib seo-note" data-seo-note="1">
+  <div class="ib-i">✅</div>
+  <div class="ib-t">
+    <strong>주휴수당 계산기 계산 기준(요약)</strong>
+    <ul style="margin-top:8px">
+      <li>주휴수당은 주 15시간 이상 근무하고 소정근로일을 개근한 경우 발생</li>
+      <li>산식(근사): (주 소정근로시간 ÷ 40) × 8 × 시급</li>
+      <li>주 40시간 초과 근무라도 산정 기준 시간은 최대 8시간</li>
+    </ul>
+    <div style="margin-top:8px; font-size:12px; color:#7A5A3A; line-height:1.7;">단시간/교대근무 등은 회사 기준과 근무표에 따라 결과가 달라질 수 있습니다.</div>
+  </div>
+</div>
+<div class="ad-slot ad-slot-top"><div class="ad-placeholder">광고 영역</div></div>
+<div class="content-with-ad"><div class="content-main">
+<div class="law"><strong>📖 법적 근거</strong><br>
+• 근로기준법 §55 — 주 1회 이상 유급휴일 부여<br>
+• 주휴수당 = (주 소정근로시간 ÷ 40) × 8 × 시급<br>
+• §18③ — 주 15h 미만 근로자 미적용</div>
+<div class="card">
+  <div class="st">📝 근무 정보</div>
+  <div class="fr"><div class="fg"><label class="fl">시급 (원)</label><input class="fi" id="wk-w" value="10,320" oninput="fmt(this)"></div>
+  <div class="fg"><label class="fl">1주 소정근로시간</label><input class="fi" id="wk-h" value="40"></div></div>
+  <button class="btn" onclick="calcWk()">주휴수당 계산하기</button>
+  <div class="ra" id="r-wk"><div class="rh"><div class="rh-l">주 1회 주휴수당</div><div class="rh-v" id="rwk-v"></div><div class="rh-s" id="rwk-s"></div></div>
+  <table class="rt"><thead><tr><th colspan="2">주휴수당 산출</th></tr></thead><tbody id="rwk-t"></tbody></table>
+  <div class="ad-slot ad-slot-mid"><div class="ad-placeholder">광고 영역</div></div>
+  <div class="rn"><strong>※</strong> 주 40h 초과 시에도 산정기준 최대 8시간</div></div>
+</div>
+</div><div class="content-side"><div class="ad-slot ad-slot-side"><div class="ad-placeholder">광고 영역</div></div></div>
+</div></div>
+
+<!-- ============================== SHUTDOWN ============================== -->
+<div class="sp" id="s-shutdown">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">휴업수당 계산기</div>
+<div class="pd">사용자 귀책사유 휴업 시 지급 의무 수당을 계산합니다.</div>
+<div class="ib seo-note" data-seo-note="1">
+  <div class="ib-i">✅</div>
+  <div class="ib-t">
+    <strong>휴업수당 계산기 계산 기준(요약)</strong>
+    <ul style="margin-top:8px">
+      <li>사용자 귀책사유 휴업 시: 평균임금의 70% 이상 지급 원칙</li>
+      <li>70%가 통상임금보다 크면 통상임금 지급 가능(법 규정 근거)</li>
+      <li>입력한 평균임금/통상임금 입력값을 기반으로 근사 산정</li>
+    </ul>
+    <div style="margin-top:8px; font-size:12px; color:#7A5A3A; line-height:1.7;">휴업 사유 및 귀책 여부 판단은 케이스에 따라 달라질 수 있어 전문가/기관 확인을 권장합니다.</div>
+  </div>
+</div>
+<div class="ad-slot ad-slot-top"><div class="ad-placeholder">광고 영역</div></div>
+<div class="content-with-ad"><div class="content-main">
+<div class="law"><strong>📖 법적 근거</strong><br>
+• 근로기준법 §46① — 평균임금의 70% 이상 지급<br>
+• §46② — 70%가 통상임금 초과 시 통상임금 지급 가능<br>
+• 위반 시 §109 — 3년 이하 징역 / 3천만원 이하 벌금</div>
+<div class="card">
+  <div class="st">📝 임금 정보</div>
+  <div class="fr"><div class="fg"><label class="fl">1일 평균임금 (원)</label><input class="fi" id="sd-avg" placeholder="예: 100,000" oninput="fmt(this)"></div>
+  <div class="fg"><label class="fl">휴업일수</label><input class="fi" id="sd-days" value="30"></div></div>
+  <div class="fr"><div class="fg"><label class="fl">1일 통상임금 (선택)</label><input class="fi" id="sd-ord" placeholder="비워두면 미적용" oninput="fmt(this)"></div></div>
+  <button class="btn" onclick="calcSd()">휴업수당 계산하기</button>
+  <div class="ra" id="r-sd"><div class="rh"><div class="rh-l">예상 휴업수당 총액</div><div class="rh-v" id="rsd-v"></div><div class="rh-s" id="rsd-s"></div></div>
+  <table class="rt"><thead><tr><th colspan="2">휴업수당 산출</th></tr></thead><tbody id="rsd-t"></tbody></table>
+  <div class="ad-slot ad-slot-mid"><div class="ad-placeholder">광고 영역</div></div>
+  <div class="rn"><strong>※</strong> 근로기준법 §46② — 평균임금 70% > 통상임금이면 통상임금 적용 가능</div></div>
+</div>
+</div><div class="content-side"><div class="ad-slot ad-slot-side"><div class="ad-placeholder">광고 영역</div></div></div>
+</div></div>
+
+<!-- ============================== PRIVACY POLICY ============================== -->
+<div class="sp" id="s-privacy">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">개인정보처리방침</div>
+<div class="legal-content">
+<p><em>시행일: 2026년 1월 1일</em></p>
+
+<h2>1. 개인정보의 수집 및 이용</h2>
+<p>월급연구소(이하 "사이트")는 별도의 회원가입 절차 없이 서비스를 제공하며, 이용자의 개인정보를 직접 수집하지 않습니다. 다만 아래의 경우 자동으로 정보가 수집될 수 있습니다.</p>
+<ul>
+  <li>접속 기기 정보 (브라우저 종류, OS 등)</li>
+  <li>접속 IP 주소, 접속 일시</li>
+  <li>방문 페이지 기록</li>
+</ul>
+<p>이러한 정보는 서비스 개선 및 통계 분석 목적으로만 활용되며, 개인을 식별할 수 없는 형태로 처리됩니다.</p>
+
+<h2>2. 광고 서비스 관련</h2>
+<p>사이트는 Google AdSense 등 제3자 광고 서비스를 이용할 수 있으며, 해당 서비스는 쿠키(Cookie)를 사용하여 이용자에게 맞춤형 광고를 제공할 수 있습니다.</p>
+<ul>
+  <li>Google의 광고 쿠키 사용에 대한 자세한 내용은 <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener">Google 광고 정책</a>을 참조하세요.</li>
+  <li>이용자는 <a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google 광고 설정</a>에서 맞춤 광고를 비활성화할 수 있습니다.</li>
+  <li>쿠키를 비활성화하려면 브라우저 설정에서 쿠키 차단을 설정할 수 있습니다.</li>
+</ul>
+
+<h2>3. 분석 도구</h2>
+<p>사이트는 Google Analytics 등 웹 분석 도구를 사용하여 방문 통계를 수집할 수 있습니다. 수집된 데이터는 익명화 처리되며, 서비스 개선 목적으로만 활용됩니다.</p>
+
+<h2>4. 개인정보의 제3자 제공</h2>
+<p>사이트는 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만 법령에 의한 요청이 있는 경우 예외로 합니다.</p>
+
+<h2>5. 개인정보의 보유 및 파기</h2>
+<p>자동 수집된 로그 정보는 수집일로부터 1년 이내에 파기합니다.</p>
+
+<h2>6. 이용자의 권리</h2>
+<p>이용자는 언제든지 쿠키 설정을 변경하거나, 수집된 정보의 삭제를 요청할 수 있습니다.</p>
+
+<h2>7. 문의</h2>
+<p>개인정보 관련 문의사항은 사이트 하단의 연락처를 통해 문의해 주세요.</p>
+
+<h2>8. 변경 사항</h2>
+<p>본 방침은 법령 변경 또는 서비스 변경에 따라 수정될 수 있으며, 변경 시 사이트를 통해 공지합니다.</p>
+</div>
+</div>
+
+<!-- ============================== TERMS ============================== -->
+<div class="sp" id="s-terms">
+<button class="bb" onclick="go('home')">← 홈으로</button>
+<div class="pt">이용약관 및 면책조항</div>
+<div class="legal-content">
+<h2>1. 서비스 개요</h2>
+<p>월급연구소는 2026년 대한민국 노동 관련 법령(근로기준법, 고용보험법, 국민연금법, 국민건강보험법, 최저임금법 등)을 기반으로 급여 관련 근사 계산 서비스를 무료로 제공합니다.</p>
+
+<h2>2. 면책조항</h2>
+<p>본 사이트에서 제공하는 모든 계산 결과는 <strong>참고용</strong>이며, 법적 효력을 갖지 않습니다.</p>
+<ul>
+  <li>소득세는 근로소득 간이세액표를 기반으로 한 근사치이며, 실제 연말정산 결과와 차이가 발생할 수 있습니다.</li>
+  <li>4대보험료는 상·하한액, 정산 차액 등에 의해 실제 공제액과 차이가 있을 수 있습니다.</li>
+  <li>퇴직금, 실업급여 등의 계산은 개별 상황(휴직 기간, 특수 임금 체계 등)에 따라 달라질 수 있습니다.</li>
+  <li>정확한 금액 확인은 국세청, 고용노동부, 국민연금공단, 국민건강보험공단 등 관련 기관에 문의해 주세요.</li>
+</ul>
+
+<h2>3. 계산 기준</h2>
+<ul>
+  <li>4대보험 요율: 2026년 1월 1일 기준 (국민연금 9.5%, 건강보험 7.19%, 장기요양 13.14%, 고용보험 1.8%)</li>
+  <li>최저임금: 시간급 10,320원 (고용노동부 고시 제2025-47호)</li>
+  <li>소득세: 근로소득 간이세액표 기반 근사 계산</li>
+  <li>퇴직금: 근로자퇴직급여 보장법 제8조 기준</li>
+  <li>실업급여: 고용보험법 제45조, 제46조, 제50조 기준</li>
+</ul>
+
+<h2>4. 저작권</h2>
+<p>본 사이트의 디자인, 코드, 콘텐츠에 대한 저작권은 월급연구소에 있습니다. 무단 복제 및 배포를 금지합니다.</p>
+
+<h2>5. 약관 변경</h2>
+<p>본 약관은 관련 법령 변경 또는 서비스 변경에 따라 수정될 수 있으며, 변경 시 사이트를 통해 공지합니다.</p>
+</div>
+</div>
+
+</main>
+
+<!-- Footer -->
+<footer class="ft">
+  <div class="ft-links">
+    <a href="javascript:go('home')">홈</a>
+    <a href="javascript:go('privacy')">개인정보처리방침</a>
+    <a href="javascript:go('terms')">이용약관 / 면책조항</a>
+  </div>
+  <p>월급연구소 &copy; 2026 | 본 계산기는 참고용이며 법적 효력이 없습니다.</p>
+    <p style="margin-top:4px;">문의: <a href="mailto:ghunsik.kim@gmail.com">ghunsik.kim@gmail.com</a></p>
+<p style="margin-top:3px;">근로기준법 · 국민연금법 · 국민건강보험법 · 고용보험법 · 최저임금법 등 2026년 법령 기준</p>
+</footer>
+
+<script>
+// ===== Utilities =====
+function fmt(el){let v=el.value.replace(/[^0-9]/g,'');el.value=v?Number(v).toLocaleString('ko-KR'):''}
+function pn(id){return Number((document.getElementById(id)?.value||'').replace(/[^0-9]/g,''))||0}
+function w(n){return Math.round(n).toLocaleString('ko-KR')+'원'}
+
+// ===== Navigation =====
+function go(name){
+  document.querySelectorAll('.sp').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  const el=document.getElementById('s-'+name);if(el)el.classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.dataset.s===name)n.classList.add('on')});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.ni').forEach(i=>i.addEventListener('click',()=>go(i.dataset.s)));
+
+// ===== 2026 Rates =====
+const R={np:.0475,hi:.03595,ltc:.1314,ei:.009,mw:10320,mh:209};
+
+// ===== Income Tax (간이세액표 근사) =====
+function tax(mt,fm,ch){
+  const an=mt*12;let d=0;
+  if(an<=5e6)d=an*.7;else if(an<=15e6)d=35e5+(an-5e6)*.4;else if(an<=45e6)d=75e5+(an-15e6)*.15;else if(an<=1e8)d=12e6+(an-45e6)*.05;else d=1475e4+(an-1e8)*.02;
+  let ti=an-d-fm*15e5;ti-=mt*R.np*12;const hm=mt*R.hi;ti-=(hm+hm*R.ltc)*12;ti-=mt*R.ei*12;ti-=13e5;
+  if(ti<=0)return 0;let t=0;
+  if(ti<=14e6)t=ti*.06;else if(ti<=5e7)t=84e4+(ti-14e6)*.15;else if(ti<=88e6)t=624e4+(ti-5e7)*.24;else if(ti<=15e7)t=1536e4+(ti-88e6)*.35;else if(ti<=3e8)t=3706e4+(ti-15e7)*.38;else if(ti<=5e8)t=9406e4+(ti-3e8)*.40;else if(ti<=1e9)t=17406e4+(ti-5e8)*.42;else t=38406e4+(ti-1e9)*.45;
+  let c=0;if(t<=13e5)c=t*.55;else c=715e3+(t-13e5)*.3;if(c>74e4)c=74e4;t-=c;
+  if(ch===1)t-=15e4;else if(ch===2)t-=35e4;else if(ch>=3)t-=35e4+(ch-2)*3e5;
+  if(t<0)t=0;let mt2=Math.round(t/12);
+  const cd=ch===1?12500:ch===2?29160:ch>=3?29160+(ch-2)*25000:0;
+  return Math.max(0,mt2-cd);
+}
+function ins4(mt){const p=Math.round(mt*R.np),h=Math.round(mt*R.hi),l=Math.round(h*R.ltc),e=Math.round(mt*R.ei);return{p,h,l,e,t:p+h+l+e}}
+
+// ===== Annual =====
+function calcA(){
+  const sal=pn('a-sal'),nt=pn('a-nt'),fm=+document.getElementById('a-fm').value,ch=+document.getElementById('a-ch').value;
+  if(!sal)return alert('연봉을 입력해주세요.');
+  const mg=Math.round(sal/12),mt=mg-nt,i=ins4(mt),it=tax(mt,fm,ch),lt=Math.round(it*.1),td=i.t+it+lt,net=mg-td;
+  document.getElementById('ra-v').textContent=w(net);
+  document.getElementById('ra-s').textContent=`세전 ${w(mg)} | 공제 ${w(td)} | 공제율 ${(td/mg*100).toFixed(1)}%`;
+  document.getElementById('ra-t').innerHTML=`
+    <tr><td class="lc">세전 월급여</td><td class="vc">${w(mg)}</td></tr>
+    <tr><td class="lc">비과세액</td><td class="vc">${w(nt)}</td></tr>
+    <tr><td class="lc">과세 대상</td><td class="vc">${w(mt)}</td></tr>
+    <tr class="sr"><td class="lc">4대보험 소계</td><td class="vc">-${w(i.t)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;국민연금 4.75%</td><td class="vc">-${w(i.p)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;건강보험 3.595%</td><td class="vc">-${w(i.h)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;장기요양 13.14%</td><td class="vc">-${w(i.l)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;고용보험 0.9%</td><td class="vc">-${w(i.e)}</td></tr>
+    <tr class="sr"><td class="lc">세금 소계</td><td class="vc">-${w(it+lt)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;소득세</td><td class="vc">-${w(it)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;지방소득세</td><td class="vc">-${w(lt)}</td></tr>
+    <tr class="tr"><td class="lc">월 실수령액</td><td class="vc">${w(net)}</td></tr>
+    <tr><td class="lc">연 실수령액</td><td class="vc">${w(net*12)}</td></tr>`;
+  document.getElementById('r-a').classList.add('show');
+}
+
+// ===== Monthly =====
+function calcM(){
+  const sal=pn('m-sal'),nt=pn('m-nt'),fm=+document.getElementById('m-fm').value,ch=+document.getElementById('m-ch').value;
+  if(!sal)return alert('월급을 입력해주세요.');
+  const mt=sal-nt,i=ins4(mt),it=tax(mt,fm,ch),lt=Math.round(it*.1),td=i.t+it+lt,net=sal-td;
+  document.getElementById('rm-v').textContent=w(net);
+  document.getElementById('rm-s').textContent=`공제 ${w(td)} | 공제율 ${(td/sal*100).toFixed(1)}%`;
+  document.getElementById('rm-t').innerHTML=`
+    <tr><td class="lc">세전 월급</td><td class="vc">${w(sal)}</td></tr>
+    <tr><td class="lc">과세 대상</td><td class="vc">${w(mt)}</td></tr>
+    <tr class="sr"><td class="lc">4대보험</td><td class="vc">-${w(i.t)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;국민연금</td><td class="vc">-${w(i.p)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;건강보험</td><td class="vc">-${w(i.h)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;장기요양</td><td class="vc">-${w(i.l)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;고용보험</td><td class="vc">-${w(i.e)}</td></tr>
+    <tr class="sr"><td class="lc">세금</td><td class="vc">-${w(it+lt)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;소득세</td><td class="vc">-${w(it)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;지방소득세</td><td class="vc">-${w(lt)}</td></tr>
+    <tr class="tr"><td class="lc">월 실수령액</td><td class="vc">${w(net)}</td></tr>`;
+  document.getElementById('r-m').classList.add('show');
+}
+
+// ===== Hourly =====
+function calcH(){
+  const wg=pn('h-w'),hpd=+document.getElementById('h-h').value,dpw=+document.getElementById('h-d').value,incWk=document.getElementById('h-wk').value==='1';
+  if(!wg)return alert('시급을 입력해주세요.');
+  const wh=hpd*dpw,dp=wg*hpd,wp=dp*dpw;let wkp=0;
+  if(incWk&&wh>=15)wkp=Math.round(Math.min(wh/40*8,8)*wg);
+  const wtp=wp+wkp,mp=Math.round(wtp*(365/7)/12),ok=wg>=R.mw;
+  document.getElementById('rh-v').textContent=w(mp);
+  document.getElementById('rh-s').textContent=ok?`✅ 최저임금 충족`:`⚠️ 최저임금 미달!`;
+  document.getElementById('rh-t').innerHTML=`
+    <tr><td class="lc">시급</td><td class="vc">${w(wg)}</td></tr>
+    <tr><td class="lc">일급 (${hpd}h)</td><td class="vc">${w(dp)}</td></tr>
+    <tr><td class="lc">주 기본급 (${dpw}일)</td><td class="vc">${w(wp)}</td></tr>
+    <tr><td class="lc">주휴수당</td><td class="vc">${incWk&&wh>=15?w(wkp):'-'}</td></tr>
+    <tr class="tr"><td class="lc">월 환산 (세전)</td><td class="vc">${w(mp)}</td></tr>
+    <tr><td class="lc">연 환산</td><td class="vc">${w(mp*12)}</td></tr>
+    <tr><td class="lc">최저임금 준수</td><td class="vc" style="color:${ok?'#1B4332':'#D32F2F'}">${ok?'✅ 충족':'❌ 미달'}</td></tr>`;
+  document.getElementById('r-h').classList.add('show');
+}
+
+// ===== Severance =====
+function calcSv(){
+  const sd=document.getElementById('sv-s').value,ed=document.getElementById('sv-e').value,bp=pn('sv-b'),al=pn('sv-a'),bn=pn('sv-bn'),aa=pn('sv-al');
+  if(!sd||!ed)return alert('입사일과 퇴사일을 입력해주세요.');if(!bp)return alert('월 기본급을 입력해주세요.');
+  const s=new Date(sd),e=new Date(ed),td=Math.round((e-s)/864e5);
+  if(td<365)return alert('퇴직금은 1년 이상 근무 시 발생합니다.');
+  const yr=td/365,m3=(bp+al)*3,bnP=Math.round(bn/12*3),aaP=Math.round(aa/12*3),tot3=m3+bnP+aaP;
+  const e2=new Date(ed),m3s=new Date(e2);m3s.setMonth(m3s.getMonth()-3);
+  const days3=Math.round((e2-m3s)/864e5)||92,davg=tot3/days3,sev=Math.round(davg*30*(td/365));
+  document.getElementById('rsv-v').textContent=w(sev);
+  document.getElementById('rsv-s').textContent=`재직 ${Math.floor(yr)}년 ${Math.round((yr%1)*12)}개월 (${td}일)`;
+  document.getElementById('rsv-t').innerHTML=`
+    <tr><td class="lc">총 재직일수</td><td class="vc">${td.toLocaleString()}일</td></tr>
+    <tr><td class="lc">3개월 역일수</td><td class="vc">${days3}일</td></tr>
+    <tr><td class="lc">3개월 기본급+수당</td><td class="vc">${w(m3)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;상여금 가산</td><td class="vc">+${w(bnP)}</td></tr>
+    <tr><td class="lc">&nbsp;&nbsp;연차수당 가산</td><td class="vc">+${w(aaP)}</td></tr>
+    <tr><td class="lc">3개월 임금총액</td><td class="vc">${w(tot3)}</td></tr>
+    <tr><td class="lc">1일 평균임금</td><td class="vc">${w(davg)}</td></tr>
+    <tr class="tr"><td class="lc">예상 퇴직금</td><td class="vc">${w(sev)}</td></tr>`;
+  document.getElementById('r-sv').classList.add('show');
+}
+
+// ===== Unemployment =====
+function calcUe(){
+  const sal=pn('ue-sal'),age=document.getElementById('ue-age').value,per=+document.getElementById('ue-per').value,days=+document.getElementById('ue-days').value||92;
+  if(!sal)return alert('월평균 급여를 입력해주세요.');
+  const davg=sal*3/days,b60=Math.round(davg*.6),up=68100,lo=66048;
+  let daily=b60;if(daily>up)daily=up;if(daily<lo)daily=lo;
+  const tbl={u50:{1:120,3:150,5:180,10:210,99:240},o50:{1:120,3:180,5:210,10:240,99:270}};
+  const td=tbl[age][per]||150,tot=daily*td,mo=daily*30;
+  let note='';if(b60>up)note='상한액 적용';else if(b60<lo)note='하한액 적용';else note='평균임금 60%';
+  document.getElementById('rue-v').textContent=w(daily);
+  document.getElementById('rue-s').textContent=`소정급여일수 ${td}일 | 총 ${w(tot)}`;
+  document.getElementById('rue-t').innerHTML=`
+    <tr><td class="lc">월평균 급여</td><td class="vc">${w(sal)}</td></tr>
+    <tr><td class="lc">1일 평균임금</td><td class="vc">${w(davg)}</td></tr>
+    <tr><td class="lc">기초일액 × 60%</td><td class="vc">${w(b60)}</td></tr>
+    <tr><td class="lc">상한액 / 하한액</td><td class="vc">${w(up)} / ${w(lo)}</td></tr>
+    <tr><td class="lc">적용 기준</td><td class="vc">${note}</td></tr>
+    <tr class="tr"><td class="lc">1일 구직급여</td><td class="vc">${w(daily)}</td></tr>
+    <tr><td class="lc">월 예상 (30일)</td><td class="vc">${w(mo)}</td></tr>
+    <tr><td class="lc">소정급여일수</td><td class="vc">${td}일</td></tr>
+    <tr class="tr"><td class="lc">총 예상 구직급여</td><td class="vc">${w(tot)}</td></tr>`;
+  document.getElementById('r-ue').classList.add('show');
+}
+
+// ===== Annual Leave =====
+function calcLv(){
+  const sd=document.getElementById('lv-s').value,ed=document.getElementById('lv-e').value;
+  if(!sd||!ed)return alert('날짜를 입력해주세요.');
+  const s=new Date(sd),e=new Date(ed),td=Math.round((e-s)/864e5),yr=td/365,fy=Math.floor(yr);
+  let cur=0;
+  if(fy<1){cur=Math.min(Math.floor(td/30),11);}
+  else{cur=15;if(fy>=3)cur=Math.min(15+Math.floor((fy-1)/2),25);}
+  document.getElementById('rlv-v').textContent=cur+'일';
+  document.getElementById('rlv-s').textContent=`근속 ${fy}년 ${Math.round((yr%1)*12)}개월`;
+  let rows='';
+  for(let y=0;y<=Math.min(fy,20);y++){
+    let lv;if(y===0)lv='최대 11일';
+    else{let d=15;if(y>=3)d=Math.min(15+Math.floor((y-1)/2),25);lv=d+'일';}
+    rows+=`<tr${y===fy?' class="tr"':''}><td class="lc">${y===0?'1년 미만':y+'년차'}</td><td class="vc">${lv}${y===fy?' ← 현재':''}</td></tr>`;
+  }
+  document.getElementById('rlv-t').innerHTML=rows;
+  document.getElementById('r-lv').classList.add('show');
+}
+
+// ===== Weekly Holiday =====
+function calcWk(){
+  const wg=pn('wk-w'),wh=parseFloat(document.getElementById('wk-h').value)||0;
+  if(!wg)return alert('시급을 입력해주세요.');
+  if(wh<15)return alert('주 15시간 이상이어야 합니다.');
+  const whh=Math.min(wh/40*8,8),wkp=Math.round(whh*wg),mp=Math.round(wkp*(365/7)/12);
+  document.getElementById('rwk-v').textContent=w(wkp);
+  document.getElementById('rwk-s').textContent=`월 환산 약 ${w(mp)}`;
+  document.getElementById('rwk-t').innerHTML=`
+    <tr><td class="lc">시급</td><td class="vc">${w(wg)}</td></tr>
+    <tr><td class="lc">1주 소정근로시간</td><td class="vc">${wh}h</td></tr>
+    <tr><td class="lc">주휴 산정시간</td><td class="vc">${whh.toFixed(1)}h</td></tr>
+    <tr class="tr"><td class="lc">주 1회 주휴수당</td><td class="vc">${w(wkp)}</td></tr>
+    <tr><td class="lc">월 환산</td><td class="vc">${w(mp)}</td></tr>
+    <tr><td class="lc">연 환산</td><td class="vc">${w(mp*12)}</td></tr>`;
+  document.getElementById('r-wk').classList.add('show');
+}
+
+// ===== Shutdown =====
+function calcSd(){
+  const avg=pn('sd-avg'),days=+document.getElementById('sd-days').value||0,ord=pn('sd-ord');
+  if(!avg)return alert('평균임금을 입력해주세요.');if(!days)return alert('휴업일수를 입력해주세요.');
+  const a70=Math.round(avg*.7);let daily=a70,note='평균임금의 70%';
+  if(ord&&a70>ord){daily=ord;note='통상임금 적용 (§46②)';}
+  const tot=daily*days;
+  document.getElementById('rsd-v').textContent=w(tot);
+  document.getElementById('rsd-s').textContent=`1일 ${w(daily)} × ${days}일`;
+  document.getElementById('rsd-t').innerHTML=`
+    <tr><td class="lc">1일 평균임금</td><td class="vc">${w(avg)}</td></tr>
+    <tr><td class="lc">평균임금 70%</td><td class="vc">${w(a70)}</td></tr>
+    ${ord?`<tr><td class="lc">1일 통상임금</td><td class="vc">${w(ord)}</td></tr>`:''}
+    <tr><td class="lc">적용 기준</td><td class="vc">${note}</td></tr>
+    <tr><td class="lc">휴업일수</td><td class="vc">${days}일</td></tr>
+    <tr class="tr"><td class="lc">휴업수당 총액</td><td class="vc">${w(tot)}</td></tr>`;
+  document.getElementById('r-sd').classList.add('show');
+}
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded',()=>{
+  const t=new Date().toISOString().split('T')[0];
+  ['lv-e','sv-e'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=t;});
+});
+</script>
+</body>
+</html>
