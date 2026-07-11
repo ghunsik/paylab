@@ -1,6 +1,13 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import {
+  buildContentSecurityPolicy,
+  canonicalOriginResponse,
+  createContentSecurityNonce,
+  requestWithContentSecurityPolicy,
+  responseWithSecurityHeaders,
+} from "./security";
 
 interface Env {
   ASSETS: Fetcher;
@@ -27,20 +34,32 @@ interface ExecutionContext {
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
+    const requestUrl = new URL(request.url);
+    const nonce = createContentSecurityNonce();
+    const policy = buildContentSecurityPolicy(nonce);
+    const canonicalResponse = canonicalOriginResponse(request, import.meta.env.PROD);
 
-    if (url.pathname === "/_vinext/image") {
+    if (canonicalResponse) {
+      return responseWithSecurityHeaders(canonicalResponse, policy, requestUrl);
+    }
+
+    const securedRequest = requestWithContentSecurityPolicy(request, policy);
+    let response: Response;
+
+    if (requestUrl.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
-      return handleImageOptimization(request, {
-        fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
+      response = await handleImageOptimization(securedRequest, {
+        fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, securedRequest.url))),
         transformImage: async (body, { width, format, quality }) => {
           const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
           return result.response();
         },
       }, allowedWidths);
+    } else {
+      response = await handler.fetch(securedRequest, env, ctx);
     }
 
-    return handler.fetch(request, env, ctx);
+    return responseWithSecurityHeaders(response, policy, requestUrl);
   },
 };
 

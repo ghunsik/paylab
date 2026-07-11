@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import "./globals.css";
 import { AnonymousAnalytics } from "@/app/components/AnonymousAnalytics";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site-content";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "paylab.kr";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
-  const metadataBase = new URL(`${protocol}://${host}`);
+export function generateMetadata(): Metadata {
+  const metadataBase = new URL("https://paylab.kr");
   const socialImage = new URL("/og.png", metadataBase).toString();
 
   return {

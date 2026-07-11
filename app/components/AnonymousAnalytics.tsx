@@ -12,7 +12,8 @@ export function recordAnonymousMetric(metric: AnalyticsMetric, path: string) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ metric, path }),
     keepalive: true,
-    credentials: "same-origin",
+    credentials: "omit",
+    mode: "same-origin",
   }).catch(() => {
     // Analytics must never interrupt the calculator experience.
   });

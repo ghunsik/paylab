@@ -8,8 +8,23 @@ export type AnalyticsEvent = {
 };
 
 const MAX_PATH_LENGTH = 160;
-const ANALYTICS_PATH = "/analytics";
-const API_PATH_PREFIX = "/api/";
+const PAGEVIEW_PATHS = new Set([
+  "/",
+  "/standards",
+  "/methodology",
+  "/privacy",
+  "/terms",
+  "/calculators/salary",
+  "/calculators/hourly",
+  "/calculators/severance",
+  "/calculators/unemployment",
+  "/calculators/annual-leave",
+  "/calculators/weekly-holiday",
+  "/calculators/shutdown",
+]);
+const CALCULATOR_PATHS = new Set(
+  [...PAGEVIEW_PATHS].filter((path) => path.startsWith("/calculators/")),
+);
 
 function isAnalyticsMetric(value: unknown): value is AnalyticsMetric {
   return typeof value === "string" &&
@@ -36,21 +51,20 @@ export function normalizeAnalyticsPath(value: unknown): string | null {
     ? parsed.pathname.replace(/\/+$/, "")
     : "/";
 
-  if (normalized === ANALYTICS_PATH || normalized.startsWith(API_PATH_PREFIX)) {
-    return null;
-  }
-
-  return normalized;
+  return PAGEVIEW_PATHS.has(normalized) ? normalized : null;
 }
 
 export function parseAnalyticsEvent(value: unknown): AnalyticsEvent | null {
-  if (!value || typeof value !== "object") return null;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+
+  const keys = Object.keys(value).sort();
+  if (keys.length !== 2 || keys[0] !== "metric" || keys[1] !== "path") return null;
 
   const payload = value as { metric?: unknown; path?: unknown };
   const path = normalizeAnalyticsPath(payload.path);
   if (!isAnalyticsMetric(payload.metric) || !path) return null;
 
-  if (payload.metric === "calculation" && !path.startsWith("/calculators/")) {
+  if (payload.metric === "calculation" && !CALCULATOR_PATHS.has(path)) {
     return null;
   }
 

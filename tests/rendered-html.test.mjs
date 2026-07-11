@@ -32,6 +32,27 @@ test("server-renders the finished PAYLAB home page", async () => {
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 });
 
+test("applies strict security headers with matching script nonces", async () => {
+  const response = await render();
+  const policy = response.headers.get("content-security-policy") ?? "";
+  const nonce = /'nonce-([A-Za-z0-9]+)'/.exec(policy)?.[1];
+
+  assert.ok(nonce);
+  assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000");
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.doesNotMatch(policy, /unsafe-inline|unsafe-eval/);
+
+  const html = await response.text();
+  const inlineScripts = (html.match(/<script\b[^>]*>/g) ?? []).filter(
+    (tag) => !/\bsrc=/.test(tag),
+  );
+  assert.ok(inlineScripts.length > 0);
+  for (const tag of inlineScripts) {
+    assert.match(tag, new RegExp(`\\bnonce=["']${nonce}["']`));
+  }
+});
+
 test("calculator routes render unique content", async () => {
   const response = await render("/calculators/severance");
   assert.equal(response.status, 200);
