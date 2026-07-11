@@ -10,6 +10,7 @@ import {
   calculateUnemploymentBenefit,
   calculateWeeklyHolidayPay,
 } from "@/lib/calculations";
+import { recordAnonymousMetric } from "@/app/components/AnonymousAnalytics";
 import { calculatorBySlug, type CalculatorSlug } from "@/lib/site-content";
 
 type ResultLike = {
@@ -362,7 +363,7 @@ function CalculatorFrame({
   );
 }
 
-function useCalculatorResult() {
+function useCalculatorResult(slug: CalculatorSlug) {
   const [result, setResult] = useState<ResultLike | null>(null);
   const [error, setError] = useState("");
   const resultRef = useRef<HTMLHeadingElement>(null);
@@ -372,6 +373,7 @@ function useCalculatorResult() {
       const nextResult = calculate();
       setResult(nextResult);
       setError("");
+      recordAnonymousMetric("calculation", `/calculators/${slug}`);
       window.setTimeout(() => resultRef.current?.focus(), 0);
     } catch (caught) {
       setResult(null);
@@ -389,7 +391,7 @@ function SalaryCalculator({ compact }: { compact?: boolean }) {
   const [dependents, setDependents] = useState("1");
   const [children, setChildren] = useState("0");
   const [effectiveMonth, setEffectiveMonth] = useState("2026-07");
-  const state = useCalculatorResult();
+  const state = useCalculatorResult("salary");
 
   return (
     <CalculatorFrame
@@ -490,7 +492,7 @@ function HourlyCalculator() {
   const [weeklyHours, setWeeklyHours] = useState("40");
   const [workdays, setWorkdays] = useState("5");
   const [attended, setAttended] = useState(true);
-  const state = useCalculatorResult();
+  const state = useCalculatorResult("hourly");
 
   return (
     <CalculatorFrame
@@ -550,7 +552,7 @@ function SeveranceCalculator() {
   const [leaveAllowance, setLeaveAllowance] = useState("0");
   const [ordinaryDaily, setOrdinaryDaily] = useState("");
   const [weeklyHours, setWeeklyHours] = useState("40");
-  const state = useCalculatorResult();
+  const state = useCalculatorResult("severance");
 
   return (
     <CalculatorFrame
@@ -631,7 +633,7 @@ function UnemploymentCalculator() {
   const [dailyHours, setDailyHours] = useState("8");
   const [ageGroup, setAgeGroup] = useState<"under50" | "over50">("under50");
   const [period, setPeriod] = useState<"under1" | "1to3" | "3to5" | "5to10" | "over10">("1to3");
-  const state = useCalculatorResult();
+  const state = useCalculatorResult("unemployment");
 
   return (
     <CalculatorFrame
@@ -698,7 +700,7 @@ function AnnualLeaveCalculator() {
   const [weeklyHours, setWeeklyHours] = useState("40");
   const [attendance, setAttendance] = useState("100");
   const [fullMonths, setFullMonths] = useState(true);
-  const state = useCalculatorResult();
+  const state = useCalculatorResult("annual-leave");
 
   return (
     <CalculatorFrame
@@ -765,7 +767,7 @@ function WeeklyHolidayCalculator() {
   const [wage, setWage] = useState("10,320");
   const [hours, setHours] = useState("20");
   const [attended, setAttended] = useState(true);
-  const state = useCalculatorResult();
+  const state = useCalculatorResult("weekly-holiday");
 
   return (
     <CalculatorFrame
@@ -809,7 +811,7 @@ function ShutdownCalculator() {
   const [average, setAverage] = useState("100,000");
   const [ordinary, setOrdinary] = useState("");
   const [days, setDays] = useState("10");
-  const state = useCalculatorResult();
+  const state = useCalculatorResult("shutdown");
 
   return (
     <CalculatorFrame

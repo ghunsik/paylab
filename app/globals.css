@@ -144,7 +144,7 @@ a {
 .brand-copy small {
   margin-top: 5px;
   color: var(--ink-soft);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: -0.02em;
 }
 
@@ -186,7 +186,7 @@ a {
   border-radius: 999px;
   color: var(--ink-soft);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -212,7 +212,7 @@ a {
   padding: 9px 12px;
   border: 1px solid var(--line-dark);
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 800;
 }
 
@@ -244,7 +244,7 @@ a {
   padding: 16px 8px 4px;
   color: var(--ink-soft);
   font-family: ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -297,7 +297,7 @@ a {
   gap: 9px;
   color: rgba(255, 255, 255, 0.76);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -366,7 +366,7 @@ a {
   padding: 14px 18px;
   background: var(--lime);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.08em;
 }
@@ -385,7 +385,7 @@ a {
   align-self: start;
   color: var(--ink-soft);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .board-row div {
@@ -394,19 +394,19 @@ a {
 }
 
 .board-row strong {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .board-row small {
   margin-top: 3px;
   color: var(--ink-soft);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .board-row b {
   text-align: right;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -440,7 +440,7 @@ a {
   margin-bottom: 12px;
   color: var(--forest);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -495,7 +495,7 @@ a {
   margin-bottom: 10px;
   color: var(--forest);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -534,7 +534,7 @@ a {
 }
 
 .field-group > label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: -0.015em;
 }
@@ -590,7 +590,7 @@ a {
   background: transparent;
   color: var(--ink);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -598,7 +598,7 @@ a {
 .money-input-wrap > span {
   padding: 0 14px 0 4px;
   color: var(--ink-soft);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -609,7 +609,7 @@ a {
 .field-help {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.55;
 }
 
@@ -632,7 +632,7 @@ a {
   background: transparent;
   color: var(--ink-soft);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 800;
 }
 
@@ -667,13 +667,13 @@ a {
 }
 
 .check-field strong {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .check-field span {
   margin-top: 2px;
   color: var(--ink-soft);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .advanced-fields {
@@ -686,7 +686,7 @@ a {
   cursor: pointer;
   padding: 14px 16px;
   background: var(--surface-soft);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -711,7 +711,7 @@ a {
   border: 1px solid var(--forest);
   border-radius: 10px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 900;
   transition: transform 160ms ease, background 160ms ease;
 }
@@ -733,7 +733,7 @@ a {
   justify-content: center;
   gap: 8px;
   color: var(--ink-soft);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .result-panel {
@@ -768,7 +768,7 @@ a {
   margin-bottom: 28px;
   color: var(--lime);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.12em;
 }
@@ -823,7 +823,7 @@ a {
   gap: 16px;
   color: rgba(255, 255, 255, 0.58);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -876,7 +876,7 @@ a {
 .result-table th,
 .result-table td {
   padding: 11px 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .result-table th {
@@ -895,9 +895,9 @@ a {
 .result-row-note {
   display: block;
   margin-top: 2px;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.72);
   font-family: inherit;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -911,7 +911,7 @@ a {
 
 .result-warning strong {
   color: #ffb79b;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .result-warning ul,
@@ -919,7 +919,7 @@ a {
   margin: 8px 0 0;
   padding-left: 18px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -932,7 +932,7 @@ a {
 .assumptions summary {
   cursor: pointer;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -943,7 +943,7 @@ a {
   color: #ffd4c3;
   border: 1px solid rgba(255, 138, 92, 0.4);
   border-radius: var(--radius-sm);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .mobile-only-error {
@@ -975,7 +975,7 @@ a {
 
 .trust-rail span {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -987,7 +987,7 @@ a {
 
 .trust-rail p {
   margin: 6px 0 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .all-calculators {
@@ -1020,7 +1020,7 @@ a {
 .tool-group-heading span:last-child {
   color: var(--ink-soft);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
@@ -1047,7 +1047,7 @@ a {
 .tool-index {
   color: var(--forest);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -1059,7 +1059,7 @@ a {
 .tool-card p {
   margin: 3px 0 0;
   color: var(--ink-soft);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .tool-arrow {
@@ -1155,7 +1155,7 @@ a {
   max-width: 430px;
   margin: 12px 0 0;
   color: rgba(255, 255, 255, 0.58);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .footer-links {
@@ -1168,7 +1168,7 @@ a {
 .footer-contact a {
   width: max-content;
   color: rgba(255, 255, 255, 0.78);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .footer-links a:hover,
@@ -1185,9 +1185,9 @@ a {
 }
 
 .footer-contact span {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.62);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
@@ -1199,9 +1199,9 @@ a {
   justify-content: space-between;
   gap: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.62);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 9px;
+  font-size: 13px;
 }
 
 .route-hero {
@@ -1214,7 +1214,7 @@ a {
   flex-wrap: wrap;
   gap: 9px;
   color: var(--ink-soft);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .breadcrumbs a:hover {
@@ -1241,7 +1241,7 @@ a {
   margin-top: 34px;
   color: var(--forest);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -1274,7 +1274,7 @@ a {
 
 .route-note p {
   margin: 8px 0 0;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -1313,7 +1313,7 @@ a {
 
 .source-list span {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .source-list strong {
@@ -1330,7 +1330,7 @@ a {
 .method-summary > strong {
   color: var(--lime);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.08em;
 }
 
@@ -1338,14 +1338,14 @@ a {
   margin: 22px 0 28px;
   padding-left: 18px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.9;
 }
 
 .method-summary a {
   padding-bottom: 3px;
   border-bottom: 1px solid currentColor;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 900;
 }
 
@@ -1379,7 +1379,7 @@ a {
   margin-bottom: auto;
   color: var(--forest);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -1390,7 +1390,7 @@ a {
 .related-grid p {
   margin: 4px 0 0;
   color: var(--ink-soft);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .document-hero {
@@ -1426,7 +1426,7 @@ a {
   border: 1px solid var(--line-dark);
   border-radius: 999px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1449,7 +1449,7 @@ a {
 .standard-value span {
   color: var(--ink-soft);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -1463,7 +1463,7 @@ a {
 .standard-row p {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .standard-value {
@@ -1479,7 +1479,7 @@ a {
 
 .standard-row > a {
   justify-self: end;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 800;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -1516,9 +1516,13 @@ a {
   border-bottom: 1px solid var(--ink);
 }
 
-.standards-mini-grid span,
+.standards-mini-grid span {
+  font-size: 12px;
+}
+
 .standards-mini-grid small {
-  font-size: 10px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .standards-mini-grid strong {
@@ -1570,7 +1574,7 @@ a {
 .principles article > span {
   color: var(--forest);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -1586,7 +1590,7 @@ a {
   max-width: 500px;
   margin: 0;
   color: var(--ink-soft);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.8;
 }
 
@@ -1628,7 +1632,7 @@ a {
 }
 
 .method-cta a {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 900;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -1654,7 +1658,7 @@ a {
   margin: 0;
   color: var(--ink-soft);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .legal-content {
@@ -1815,7 +1819,7 @@ a {
   }
 
   .hero-copy > p {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .standards-board {

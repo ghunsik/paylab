@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
+import { AnonymousAnalytics } from "@/app/components/AnonymousAnalytics";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site-content";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -46,7 +47,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <AnonymousAnalytics />
+        {children}
+      </body>
     </html>
   );
 }
