@@ -1,24 +1,63 @@
-# paylab
-2026년 법령 기준 급여 종합 계산기 — 연봉·월급 실수령액, 퇴직금, 실업급여, 연차, 주휴수당, 휴업수당
+# PAYLAB 월급연구소
 
+2026년 공식 기준으로 급여·퇴직·수당의 예상액과 계산 근거를 함께 보여주는 직장인 계산 도구입니다.
+
+## 제공 계산기
+
+- 연봉·월급 실수령액
+- 시급·최저임금 월 환산
+- 퇴직금
+- 실업급여(구직급여)
+- 연차 발생일수
+- 주휴수당
+- 휴업수당
+
+각 계산기는 고유 URL을 가지며, 계산은 브라우저 안에서 수행됩니다. 사용자가 입력한 급여와 날짜 정보는 서버에 저장하지 않습니다.
+
+## 계산 기준
+
+정책 데이터는 `lib/policy.ts`, 순수 계산 함수는 `lib/calculations.ts`에서 관리합니다. 현재 정책 버전은 `2026.07.11`입니다.
+
+- 2026 최저임금: 시간당 10,320원, 월 209시간 2,156,880원
+- 국민연금 근로자 부담: 4.75%
+  - 2026.1~6 기준소득월액 40만~637만원
+  - 2026.7~12 기준소득월액 41만~659만원
+- 건강보험 근로자 부담: 3.595%
+- 장기요양: 건강보험료 × 0.9448% ÷ 7.19%
+- 고용보험 근로자 부담: 0.9%
+- 구직급여 일 상한: 68,100원(2026.1.1 이후 이직자)
+
+공식 출처는 사이트의 `/standards` 페이지와 계산기별 근거 영역에서 확인할 수 있습니다.
+
+## 결과의 한계
+
+이 프로젝트는 법적 확정액이 아닌 참고용 예상 계산기입니다. 실제 금액은 회사가 신고한 기준소득·보수, 가입 예외, 정산, 근무표, 휴직·제외기간과 원 단위 처리에 따라 달라질 수 있습니다.
+
+실수령액의 소득세는 공식 근로소득 간이세액표 조회값이 아닌 단순화한 연간 세액의 월 예상치입니다. UI와 결과 경고에서 이 한계를 명시합니다.
+
+## 로컬 실행
+
+Node.js 22.13 이상과 pnpm이 필요합니다.
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## 검증
+
+```bash
+pnpm build
+pnpm test
+pnpm lint
+```
+
+회귀 테스트는 국민연금 6월/7월 경계, 최저임금 209시간, 단시간 근로자의 구직급여 하한, 월말 퇴직금 역산, 1년 경계 연차 등 오류가 잦은 조건을 포함합니다.
+
+## 라이선스
 
 Copyright (c) 2026 Ghunsik Kim.
 
-Permission is hereby granted to view, download, and use this software for personal, educational, or internal evaluation purposes only.
+개인적·교육적·내부 평가 목적의 열람과 사용만 허용됩니다. 저작권자의 사전 서면 허락 없이 상업적 이용, 판매, 재라이선스, 재배포 또는 수정본 배포를 할 수 없습니다.
 
-You may NOT:
-1) Use this software or any derivative works for commercial purposes.
-2) Sell, sublicense, rent, lease, or otherwise monetize the software.
-3) Redistribute, publish, or share the software (in source or binary form), in whole or in part, without prior written permission from the copyright holder.
-4) Distribute modified versions (derivative works) without prior written permission.
-
-Commercial use includes, but is not limited to:
-- Using the software in a paid product or service
-- Using the software in a company’s internal operations that generate revenue
-- Offering it as part of consulting, outsourcing, or packaged solutions
-- Monetizing via ads, subscriptions, sponsorships, or paid access
-
-This software is provided "AS IS", without warranty of any kind, express or implied.
-In no event shall the authors or copyright holders be liable for any claim, damages, or other liability.
-
-If you wish to use this software commercially or obtain redistribution rights, please contact: ghunsik.kim@gmail.com
+문의: ghunsik.kim@gmail.com
