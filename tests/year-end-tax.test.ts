@@ -138,6 +138,19 @@ test("의료비는 총급여의 3%를 넘는 부분만, 일반 가족분은 700�
   assert.match(under.warnings.join(" "), /3%를 넘지 않아/);
 });
 
+test("6세 이하 등 한도 없는 의료비는 일반 가족의 700만원 한도를 적용하지 않는다", () => {
+  // 총급여 5,000만원 × 3% = 150만원. (1,000만 − 150만) × 15% = 127.5만원.
+  const unlimited = computeYearEndTax({ ...base, medicalSelf: 10_000_000 });
+  const ordinary = computeYearEndTax({ ...base, medicalFamily: 10_000_000 });
+  assert.equal(unlimited.specialCredits, 1_275_000);
+  assert.equal(ordinary.specialCredits, 1_050_000);
+  assert.equal(ordinary.determinedIncomeTax - unlimited.determinedIncomeTax, 225_000);
+
+  // 일반 가족분이 문턱을 먼저 채우면 한도 없는 의료비는 전액 남는다.
+  const mixed = computeYearEndTax({ ...base, medicalSelf: 2_000_000, medicalFamily: 8_500_000 });
+  assert.equal(mixed.specialCredits, 1_350_000);
+});
+
 test("고향사랑기부금은 10만원까지 전액, 10만~20만원 40%, 초과분 15%를 공제한다", () => {
   assert.equal(computeYearEndTax({ ...base, hometownDonation: 100_000 }).hometownCredit, 90_909);
   assert.equal(computeYearEndTax({ ...base, hometownDonation: 200_000 }).hometownCredit, 130_909);
@@ -154,6 +167,21 @@ test("월세 세액공제는 총급여 5,500만원 이하 17%, 8,000만원 초�
   const high = calculateYearEndTax({ ...base, totalSalary: 90_000_000, monthlyRent: 6_000_000 });
   assert.equal(high.rows.some((row) => row.label === "월세 세액공제"), false);
   assert.match(high.warnings.join(" "), /월세 세액공제를 적용하지 않았습니다/);
+});
+
+test("특별재난지역 적격 기부만 있으면 20만원 초과분에 30%를 적용한다", () => {
+  const disaster = computeYearEndTax({ ...base, hometownDonation: 1_000_000, hometownDonationRegion: "disaster" });
+  // 10만 × 100/110 + 10만 × 40% + 80만 × 30%
+  assert.equal(disaster.hometownCredit, 370_909);
+  assert.equal(computeYearEndTax({ ...base, hometownDonation: 200_000, hometownDonationRegion: "disaster" }).hometownCredit, 130_909);
+  assert.equal(computeYearEndTax({ ...base, hometownDonation: 100_000, hometownDonationRegion: "disaster" }).hometownCredit, 90_909);
+  const ordinary = computeYearEndTax({ ...base, hometownDonation: 1_000_000 });
+  assert.equal(disaster.hometownCredit - ordinary.hometownCredit, 120_000);
+  assert.equal(calculateYearEndTax({ ...base, hometownDonation: 0, hometownDonationRegion: "mixed" }).primary.amount, calculateYearEndTax(base).primary.amount);
+  assert.equal(computeYearEndTax({ ...base, hometownDonation: 100_000, hometownDonationRegion: "mixed" }).hometownCredit, 90_909);
+  assert.equal(computeYearEndTax({ ...base, hometownDonation: 200_000, hometownDonationRegion: "mixed" }).hometownCredit, 130_909);
+  assert.throws(() => calculateYearEndTax({ ...base, hometownDonation: 200_001, hometownDonationRegion: "mixed" }), /20만원/);
+  assert.throws(() => calculateYearEndTax({ ...base, hometownDonation: 1_000_000, hometownDonationRegion: "mixed" }), /홈택스/);
 });
 
 test("연금계좌는 연금저축 600만, IRP 합산 900만원까지 공제한다", () => {
@@ -209,6 +237,42 @@ test("항목별 공제가 없으면 표준세액공제 13만원을 쓴다", () =
   const tax = computeYearEndTax({ ...base, healthAndEmploymentInsurance: 0 });
   assert.equal(tax.usedStandardCredit, true);
   assert.equal(tax.standardCredit, 130_000);
+});
+
+test("표준세액공제 경로에서도 주택청약저축을 유지하고 전세대출은 제외한다", () => {
+  const tax = computeYearEndTax({
+    ...base,
+    healthAndEmploymentInsurance: 0,
+    housingSubscription: 3_000_000,
+    housingLoanRepayment: 100_000,
+  });
+  assert.equal(tax.usedStandardCredit, true);
+  assert.equal(tax.housingDeduction, 1_200_000);
+  // 5,000만 − 근로소득공제 1,225만 − 인적 150만 − 연금 225만 − 청약 120만
+  assert.equal(tax.taxBase, 32_800_000);
+  // 3,280만 × 15% − 126만 − 근로세액공제 66만 − 표준 13만
+  assert.equal(tax.determinedIncomeTax, 2_870_000);
+
+  const overSalary = computeYearEndTax({
+    ...base,
+    totalSalary: 75_000_000,
+    healthAndEmploymentInsurance: 0,
+    housingSubscription: 3_000_000,
+  });
+  assert.equal(overSalary.usedStandardCredit, true);
+  assert.equal(overSalary.housingDeduction, 0);
+});
+
+test("전세대출 공제가 유리하면 특별소득공제 경로의 합산 한도 400만원을 적용한다", () => {
+  const tax = computeYearEndTax({
+    ...base,
+    healthAndEmploymentInsurance: 0,
+    housingSubscription: 3_000_000,
+    housingLoanRepayment: 12_000_000,
+  });
+  assert.equal(tax.usedStandardCredit, false);
+  assert.equal(tax.housingDeduction, 4_000_000);
+  assert.equal(tax.standardCredit, 0);
 });
 
 test("이미 낸 세금과 비교해 환급액 또는 추가 납부액을 보여준다", () => {

@@ -432,7 +432,7 @@ export function calculateSalary(input: SalaryInput): CalculationResult {
   }
   if (policy.year === 2027) {
     warnings.push(
-      "2027년 건강보험료 상·하한, 고용보험료율, 소득세 개정 사항은 아직 확정 전이라 2026년 값을 썼습니다.",
+      "2026-11-21 확인 기준 2027년 건강보험료 상·하한과 고용보험료율 개정의 확정 적용 근거를 확인하지 못해 현행 값을 썼습니다. 소득세는 정부 제출 개정안의 의결·공포 근거를 확인하지 못해 현행 기본세율·공제로 추정했습니다.",
     );
   }
 
@@ -667,10 +667,11 @@ export function calculateUnemploymentBenefit(
       policy.unemployment.lowerMinimumWageRatio *
       input.dailyHours,
   );
-  // 하한액이 상한액보다 크거나 상한액이 아직 고시되지 않은 해에는 하한액을 지급액으로 본다.
-  const lowerExceedsUpper = dailyUpper === null || dailyLower > dailyUpper;
+  // 상한 미확인 시에는 지급액 추정 대신 최저임금으로 산출한 하한만 안내한다.
+  const upperUnverified = dailyUpper === null;
+  const lowerExceedsUpper = dailyUpper !== null && dailyLower > dailyUpper;
   const dailyBenefit = roundWon(
-    lowerExceedsUpper
+    upperUnverified || lowerExceedsUpper
       ? dailyLower
       : clamp(rawDailyBenefit, dailyLower, dailyUpper),
   );
@@ -684,7 +685,7 @@ export function calculateUnemploymentBenefit(
   ];
   if (dailyUpper === null) {
     warnings.push(
-      `${policy.year}년 구직급여 상한액이 아직 정해지지 않아 하한액(${dailyLower.toLocaleString("ko-KR")}원)으로 계산했습니다. 평균임금이 높으면 실제 금액은 이보다 많을 수 있습니다.`,
+      `${policy.verifiedAt} 확인 기준 ${policy.year}년 적용 상한액의 확정 근거를 확인하지 못해 하한 기준 금액(${dailyLower.toLocaleString("ko-KR")}원)을 표시합니다. 실제 지급액은 평균임금·상한액과 제도 개편에 따라 달라집니다.`,
     );
   } else if (lowerExceedsUpper) {
     warnings.push("하한액이 상한액보다 커서 하한액을 적용했습니다.");
@@ -698,7 +699,12 @@ export function calculateUnemploymentBenefit(
   }
 
   return {
-    primary: { label: "1일 예상 구직급여", amount: dailyBenefit, unit: "원" },
+    primary: {
+      label: upperUnverified ? "1일 구직급여 하한 기준" : "1일 예상 구직급여",
+      amount: dailyBenefit,
+      unit: "원",
+      ...(upperUnverified ? { note: "상한액 확인 전 참고값입니다. 최종 지급액은 고용센터에서 확인하세요." } : {}),
+    },
     rows: [
       { label: "1일 평균임금", amount: roundWon(averageDailyWage), unit: "원", kind: "info" },
       { label: "평균임금의 60%", amount: roundWon(rawDailyBenefit), unit: "원", kind: "subtotal" },
@@ -707,7 +713,12 @@ export function calculateUnemploymentBenefit(
         ? []
         : [{ label: "1일 상한액", amount: dailyUpper, unit: "원" as const, kind: "info" as const }]),
       { label: "소정급여일수", amount: benefitDays, unit: "일", kind: "info" },
-      { label: "총 예상 구직급여", amount: totalBenefit, unit: "원", kind: "total" },
+      {
+        label: upperUnverified ? "하한 기준 총액" : "총 예상 구직급여",
+        amount: totalBenefit,
+        unit: "원",
+        kind: "total",
+      },
     ],
     assumptions: [
       "퇴직 전 3개월 임금총액을 월평균임금×3으로 근사했습니다.",

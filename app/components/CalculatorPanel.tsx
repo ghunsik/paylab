@@ -540,6 +540,7 @@ function YearEndTaxCalculator() {
   const [protection, setProtection] = useState("");
   const [donation, setDonation] = useState("");
   const [hometown, setHometown] = useState("");
+  const [hometownRegion, setHometownRegion] = useState("general");
   const [rent, setRent] = useState("");
   const [pensionSavings, setPensionSavings] = useState("");
   const [irp, setIrp] = useState("");
@@ -587,6 +588,7 @@ function YearEndTaxCalculator() {
             protectionInsurance: numberFromInput(protection),
             donation: numberFromInput(donation),
             hometownDonation: numberFromInput(hometown),
+            hometownDonationRegion: hometownRegion as "general" | "disaster" | "mixed",
             monthlyRent: numberFromInput(rent),
             pensionSavings: numberFromInput(pensionSavings),
             irp: numberFromInput(irp),
@@ -720,11 +722,11 @@ function YearEndTaxCalculator() {
           <div className="field-grid">
             <MoneyField
               id="yearend-medical-self"
-              label="의료비: 본인·65세 이상·장애인"
+              label="의료비: 한도 없는 대상"
               value={medicalSelf}
               onChange={setMedicalSelf}
               required={false}
-              help="실손보험금으로 돌려받은 금액은 빼고 넣으세요."
+              help="본인, 연초 6세 이하, 연말 65세 이상, 장애인, 건강보험 산정특례 대상 중증질환자 등의 의료비입니다. 실손보험금과 난임·미숙아·선천성이상아 별도 공제분은 빼세요."
             />
             <MoneyField
               id="yearend-medical-family"
@@ -757,6 +759,11 @@ function YearEndTaxCalculator() {
             <MoneyField id="yearend-donation" label="기부금" value={donation} onChange={setDonation} required={false} />
             <MoneyField id="yearend-hometown" label="고향사랑기부금" value={hometown} onChange={setHometown} required={false} />
           </div>
+          <SelectField id="yearend-hometown-region" label="고향사랑기부금 지역 구분" value={hometownRegion} onChange={setHometownRegion} help="특별재난지역 선포일부터 3개월 이내 적격 기부에 특례를 적용합니다. 기간 밖 기부는 일반 요율입니다. 두 종류가 섞여도 합계 20만원까지 계산하며, 초과하면 홈택스에서 확인해 주세요.">
+            <option value="general">일반 요율 기부만 있어요 (특례기간 밖 포함)</option>
+            <option value="disaster">특별재난지역 특례 대상 기부만 있어요</option>
+            <option value="mixed">일반 요율과 특례 대상 기부가 섞여 있어요</option>
+          </SelectField>
         </div>
       </details>
 
@@ -785,7 +792,7 @@ function YearEndTaxCalculator() {
               value={subscription}
               onChange={setSubscription}
               required={false}
-              help="총급여 7,000만원 이하 무주택 세대주"
+              help="총급여 7,000만원 이하 무주택 세대주 또는 세대주의 배우자"
             />
           </div>
           <div className="field-grid">
@@ -999,7 +1006,7 @@ function UnemploymentCalculator() {
           label="퇴사한 연도"
           value={separationYear}
           onChange={setSeparationYear}
-          help="상한액과 하한액이 연도마다 다릅니다."
+          help="2027년은 상한액 확정 근거를 확인하지 못해 하한 기준 금액을 보여줍니다."
         />
       </div>
       <div className="field-grid">

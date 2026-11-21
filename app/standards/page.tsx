@@ -1,8 +1,9 @@
+import { AnnualStandards } from "@/app/components/AnnualStandards";
 import type { Metadata } from "next";
 import { SiteFooter } from "@/app/components/SiteFooter";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { POLICY_2026, POLICY_2027, POLICY_VERSION } from "@/lib/policy";
-import { standardRows, updates, VERIFIED_AT } from "@/lib/site-content";
+import { updates, VERIFIED_AT } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "적용 기준: 2026·2027년 최저임금, 4대보험, 연말정산",
@@ -32,7 +33,7 @@ const yearEndRows: Array<{ label: string; value: string; note?: string }> = [
   {
     label: "의료비 세액공제",
     value: "총급여의 3% 초과분의 15%",
-    note: "본인·65세 이상·장애인 외 가족은 연 700만원 한도",
+    note: "본인·연초 6세 이하·연말 65세 이상·장애인·산정특례 대상 중증질환자 등은 한도 없음. 그 밖의 가족은 연 700만원 한도",
   },
   { label: "교육비 세액공제", value: "15%" },
   { label: "보장성 보험료 세액공제", value: "12%, 연 100만원 한도" },
@@ -40,7 +41,7 @@ const yearEndRows: Array<{ label: string; value: string; note?: string }> = [
   {
     label: "고향사랑기부금",
     value: "10만원까지 전액, 10만~20만원 40%, 20만원 초과 15%",
-    note: "10만~20만원 구간은 2026년부터 15%에서 40%로 올랐습니다.",
+    note: "특별재난지역 선포일부터 3개월 이내 적격 기부만 있는 경우 20만원 초과분 30%. 기간 밖 기부는 일반 요율. 두 종류가 섞이고 합계 20만원을 넘으면 홈택스에서 계산해 주세요.",
   },
   {
     label: "월세 세액공제",
@@ -58,10 +59,17 @@ const yearEndRows: Array<{ label: string; value: string; note?: string }> = [
     note: "주택청약은 연 300만원 납입분까지, 총급여 7,000만원 이하",
   },
   { label: "결혼 세액공제", value: "50만원", note: "2026년 혼인신고분까지 적용됩니다." },
-  { label: "표준 세액공제", value: "13만원", note: "항목별 공제를 받지 않을 때" },
+  { label: "표준 세액공제", value: "13만원", note: "특별소득·특별세액·월세 공제를 받지 않을 때. 주택청약저축 소득공제는 함께 적용 가능" },
 ];
 
-const sources = [...POLICY_2026.sources, ...POLICY_2027.sources];
+const sources = [
+  ...POLICY_2026.sources.filter((source) => !POLICY_2027.sources.some((next) => next.url === source.url)),
+  ...POLICY_2027.sources,
+  { label: "소득세법 제59조의4 — 의료비 및 표준세액공제 (2026.11.21 확인)", url: "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1034037519" },
+  { label: "조세특례제한법 제87조 — 주택청약저축 소득공제 (2026.11.21 확인)", url: "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?lsJoLnkSeq=1031132127" },
+  { label: "조세특례제한법 제58조 — 고향사랑기부금 (2026.11.21 확인)", url: "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029627749" },
+  { label: "조세특례제한법 시행령 제53조의2 — 특별재난지역 기부 기간 (2026.11.21 확인)", url: "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lspttninfSeq=194315" },
+];
 
 export default function StandardsPage() {
   return (
@@ -81,29 +89,7 @@ export default function StandardsPage() {
 
         <section className="block">
           <h2>최저임금·4대보험·구직급여</h2>
-          <div className="table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th scope="col">항목</th>
-                  <th scope="col">2026년</th>
-                  <th scope="col">2027년</th>
-                </tr>
-              </thead>
-              <tbody>
-                {standardRows.map((row) => (
-                  <tr key={row.label}>
-                    <th scope="row">{row.label}</th>
-                    <td className="num">{row.y2026}</td>
-                    <td className="num">
-                      <span className={row.changed ? "changed" : undefined}>{row.y2027}</span>
-                      {row.note ? <small>{row.note}</small> : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AnnualStandards />
         </section>
 
         <section className="block">
@@ -133,7 +119,7 @@ export default function StandardsPage() {
                 <tr>
                   <th scope="row">2027.07 이후</th>
                   <td className="num" colSpan={2}>
-                    아직 고시되지 않았습니다.
+                    확인한 공단 자료는 2027년 6월까지 적용됩니다.
                   </td>
                 </tr>
               </tbody>
@@ -142,7 +128,7 @@ export default function StandardsPage() {
         </section>
 
         <section className="block">
-          <h2>2027년 기준 가운데 아직 정해지지 않은 것</h2>
+          <h2>2027년 적용 근거를 추가로 확인할 항목</h2>
           <ul className="source-list">
             {POLICY_2027.pending.map((item) => (
               <li key={item}>{item}</li>

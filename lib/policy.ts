@@ -49,7 +49,7 @@ export type LaborPolicy = {
   };
   readonly unemployment: {
     readonly replacementRate: number;
-    /** 아직 고시되지 않은 해는 null */
+    /** 해당 연도 적용 상한의 근거를 확인하지 못했으면 null */
     readonly dailyUpper: number | null;
     readonly lowerMinimumWageRatio: number;
     readonly maximumDailyHours: number;
@@ -70,7 +70,7 @@ export type LaborPolicy = {
     };
     readonly brackets: readonly TaxBracket[];
   };
-  /** 조사 시점에 확정되지 않아 전년도 값을 그대로 쓴 항목 */
+  /** 조사 시점에 확정 근거를 확인하지 못한 항목과 계산에 쓰는 가정 */
   readonly pending: readonly string[];
   readonly sources: readonly PolicySource[];
 };
@@ -237,32 +237,68 @@ export const POLICY_2027 = {
   },
   incomeTaxEstimate: POLICY_2026.incomeTaxEstimate,
   pending: [
-    "건강보험료 상·하한: 2027년 고시 전이라 2026년 값을 씁니다.",
-    "고용보험료율: 근로자 1.0% 인상안이 발표됐지만 시행령 개정 전이라 0.9%를 씁니다.",
-    "구직급여 상한액: 2027년 금액이 정해지지 않았습니다.",
-    "국민연금 기준소득월액: 2027년 7월 이후 상·하한은 고시 전입니다.",
-    "소득세: 2026년 세법개정안이 국회를 통과하기 전이라 2026년 세율·공제를 씁니다.",
+    "건강보험료 상·하한: 2026-11-21 공식 고시 검색에서 2027년 적용 개정 근거를 확인하지 못해 현행 2026년 값을 씁니다.",
+    "고용보험료율: 현행 시행령의 총 1.8% 중 근로자 부담 0.9%를 적용합니다. 총 2.0% 개편안은 2026-09-22 입법예고(11-02 종료)됐으나 공포·시행 근거는 2026-11-21 확인하지 못했습니다.",
+    "구직급여 상한액: 2026-11-21 확인 기준 2027년 적용 확정 근거를 확인하지 못해 하한 기준 금액만 표시합니다. 주 6일 지급 등 제도개편안은 반영하지 않았습니다.",
+    "국민연금 기준소득월액: 공단이 안내한 41만~659만원의 적용 기간은 2026-07~2027-06입니다. 2027년 7월 이후 값은 확인하지 못해 입력을 제한합니다.",
+    "소득세: 2026-08-03 세제개편안 발표, 09-01 정부안 확정, 09-03 소득세법 개정안(의안 2221042) 제출을 확인했습니다. 2026-11-21 본회의 의결·공포 근거를 확인하지 못해 현행 기본세율·공제를 적용하며 정부안은 반영하지 않았습니다.",
   ],
   sources: [
     {
-      label: "고용노동부 2027년 적용 최저임금 고시",
+      label: "고용노동부 2027년 적용 최저임금 고시 (2026-08-05)",
       url: "https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=19744",
     },
     {
       label: "국민연금공단 보험료율 및 기준소득월액",
-      url: "https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0038M0.do",
+      url: "https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0038M0.do?menuId=MN24001113&tab=tab5",
     },
     {
-      label: "보건복지부 2027년 건강보험료율 결정",
-      url: "https://www.korea.kr/policy/civilView.do?newsId=156780681",
+      label: "보건복지부 2027년 건강보험료율 결정 (2026-09-08)",
+      url: "https://www.mohw.go.kr/gallery.es?act=view&bid=0003&list_no=380402&mid=a10605040000",
     },
     {
-      label: "보건복지부 2027년 장기요양보험료율 결정",
-      url: "https://www.korea.kr/news/policyNewsView.do?newsId=148974757",
+      label: "보건복지부 2027년 장기요양보험료율 결정 (2026-10-30)",
+      url: "https://www.mohw.go.kr/gallery.es?act=view&bid=0003&list_no=380579&mid=a10606030000",
     },
     {
       label: "고용노동부 고용보험 제도개편 방안",
       url: "https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=19866",
+    },
+    {
+      label: "국민연금공단 가입자 가이드 (2027년 총요율 10%)",
+      url: "https://m.nps.or.kr/fileDown.do?atchFileId=FL26003737&atchFileSn=1",
+    },
+    {
+      label: "현행 보험료징수법 시행령 제12조 (실업급여 총요율 1.8%)",
+      url: "https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000953537",
+    },
+    {
+      label: "고용보험료율 인상 시행령 입법예고 (2026-09-22, 공포 확인 전)",
+      url: "https://www.moel.go.kr/info/lawinfo/lawmaking/view.do?bbs_seq=20260900688",
+    },
+    {
+      label: "현행 건강보험료 상·하한 고시 (2026년 시행)",
+      url: "https://law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000270472",
+    },
+    {
+      label: "현행 구직급여 기초일액 상한 (시행령 제68조, 2026-09-18 시행)",
+      url: "https://www.law.go.kr/LSW/lsSideInfoP.do?ancYnChk=0&docCls=jo&efGubun=Y&efYd=20260918&joBrNo=00&joNo=0068&lsiSeq=288717&urlMode=lsScJoRltInfoR",
+    },
+    {
+      label: "국세청 현행 근로소득 기본세율·공제",
+      url: "https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=7871&mi=6503",
+    },
+    {
+      label: "재정경제부 2026년 세제개편안 정부안 확정 (2026-09-01)",
+      url: "https://mofe.go.kr/nw/nes/detailNesDtaView.do?menuNo=4010100&searchNttId1=MOSF_000000000079193",
+    },
+    {
+      label: "국민참여입법센터 국회입법현황 소득세법 개정안 2221042 (정부, 2026-09-03)",
+      url: "https://community.lawmaking.go.kr/gcom/nsmLmSts/out/2221042/detailRP",
+    },
+    {
+      label: "소득세법 전체 제·개정문 (현행·시행예정 개정 확인)",
+      url: "https://law.go.kr/LSW/lsRvsDocListP.do?lsId=001565&lsRvsGubun=all",
     },
   ],
 } as const satisfies LaborPolicy;
@@ -290,7 +326,7 @@ export function policyForMonth(month: string): LaborPolicy {
   }
   if (month > LAST_SUPPORTED_MONTH) {
     throw new RangeError(
-      "2027년 7월 이후는 국민연금 기준소득월액이 아직 고시되지 않아 계산할 수 없습니다.",
+      "확인한 국민연금 기준소득월액의 적용 기간은 2027년 6월까지입니다. 2027년 7월 이후는 계산할 수 없습니다.",
     );
   }
   return policyForYear(Number(month.slice(0, 4)));

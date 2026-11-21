@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AnonymousAnalytics } from "@/app/components/AnonymousAnalytics";
-import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site-content";
+import { SITE_DESCRIPTION, SITE_NAME, SOCIAL_IMAGE } from "@/lib/site-content";
 
 export function generateMetadata(): Metadata {
   const metadataBase = new URL("https://paylab.kr");
-  const socialImage = new URL("/og.png", metadataBase).toString();
 
   return {
     metadataBase,
@@ -30,13 +29,13 @@ export function generateMetadata(): Metadata {
       siteName: SITE_NAME,
       title: "월급연구소: 실수령액·연말정산·퇴직금 계산기",
       description: SITE_DESCRIPTION,
-      images: [{ url: socialImage, alt: "월급연구소 PAYLAB" }],
+      images: [SOCIAL_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: "월급연구소: 실수령액·연말정산·퇴직금 계산기",
       description: SITE_DESCRIPTION,
-      images: [socialImage],
+      images: [SOCIAL_IMAGE],
     },
   };
 }

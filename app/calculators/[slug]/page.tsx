@@ -7,6 +7,7 @@ import { SiteHeader } from "@/app/components/SiteHeader";
 import {
   calculatorBySlug,
   calculators,
+  SOCIAL_IMAGE,
   type CalculatorSlug,
   VERIFIED_AT,
 } from "@/lib/site-content";
@@ -31,6 +32,7 @@ export async function generateMetadata({
       title: `${meta.title} | 월급연구소`,
       description: meta.description,
       url: `/calculators/${meta.slug}`,
+      images: [SOCIAL_IMAGE],
     },
   };
 }

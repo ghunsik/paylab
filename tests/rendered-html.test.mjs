@@ -72,6 +72,10 @@ test("year-end tax calculator route renders its form and method", async () => {
   assert.match(html, /2026년 총급여/);
   assert.match(html, /이미 낸 소득세/);
   assert.match(html, /신용카드 등 소득공제/);
+  assert.match(html, /연초 6세 이하/);
+  assert.match(html, /의료비: 한도 없는 대상/);
+  assert.match(html, /property="og:image" content="https:\/\/paylab\.kr\/og\.png\?v=2"/);
+  assert.match(html, /특별재난지역 특례 대상 기부만 있어요/);
 });
 
 test("standards page lists both years and unresolved 2027 items", async () => {
@@ -79,7 +83,7 @@ test("standards page lists both years and unresolved 2027 items", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /2,236,300원/);
-  assert.match(html, /아직 정해지지 않은 것/);
+  assert.match(html, /적용 근거를 추가로 확인할 항목/);
   assert.match(html, /2016년 12월 31일 이전 출생/);
 });
 

@@ -30,7 +30,7 @@ export type YearEndTaxInput = {
   creditCard: number;
   debitAndCash: number;
   marketAndTransit: number;
-  /** 본인·65세 이상·장애인 의료비(한도 없음) */
+  /** 본인·연초 6세 이하·연말 65세 이상·장애인·산정특례 대상 의료비(한도 없음) */
   medicalSelf: number;
   /** 그 밖의 부양가족 의료비(연 700만원 한도) */
   medicalFamily: number;
@@ -38,6 +38,8 @@ export type YearEndTaxInput = {
   protectionInsurance: number;
   donation: number;
   hometownDonation: number;
+  /** 특별재난지역은 선포일부터 3개월 이내 적격 기부만 선택. 생략하면 일반지역 */
+  hometownDonationRegion?: "general" | "disaster" | "mixed";
   /** 연간 월세 지급액 */
   monthlyRent: number;
   pensionSavings: number;
@@ -174,15 +176,21 @@ function donationCredit(amount: number, policy: YearEndPolicy): number {
   return lower * rule.lowerRate + upper * rule.upperRate;
 }
 
-function hometownCredit(amount: number, policy: YearEndPolicy): number {
+function hometownCredit(input: YearEndTaxInput, policy: YearEndPolicy): number {
   const rule = policy.hometownDonation;
-  const capped = Math.min(amount, rule.cap);
+  if (input.hometownDonation > 200_000 && input.hometownDonationRegion === "mixed") {
+    throw new RangeError("일반 요율 기부와 특별재난지역 특례 대상 기부가 섞이고 합계가 20만원을 넘으면 홈택스에서 계산해 주세요. 초과분의 구간별 배분을 지원하지 않습니다.");
+  }
+  const capped = Math.min(input.hometownDonation, rule.cap);
   let previousCeiling = 0;
   let credit = 0;
   for (const tier of rule.tiers) {
     const ceiling = tier.upTo ?? Infinity;
     if (capped > previousCeiling) {
-      credit += (Math.min(capped, ceiling) - previousCeiling) * tier.rate;
+      const rate = tier.upTo === null && input.hometownDonationRegion === "disaster"
+        ? rule.disasterExcessRate
+        : tier.rate;
+      credit += (Math.min(capped, ceiling) - previousCeiling) * rate;
     }
     previousCeiling = ceiling;
   }
@@ -240,7 +248,6 @@ export function computeYearEndTax(
       policy.housing.rate
     : 0;
   const loan = input.housingLoanRepayment * policy.housing.rate;
-  const housingDeduction = floorWon(Math.min(subscription + loan, policy.housing.combinedCap));
 
   const cardDeduction = cardDeductionFor(input, policy);
 
@@ -252,7 +259,7 @@ export function computeYearEndTax(
     Math.min(input.pensionSavings, policy.pensionAccount.savingsCap) + input.irp,
     policy.pensionAccount.combinedCap,
   );
-  const hometown = hometownCredit(input.hometownDonation, policy);
+  const hometown = hometownCredit(input, policy);
   const child = childTaxCreditFor(input.children, policy);
   const marriage = input.marriedThisYear ? policy.marriageCredit : 0;
 
@@ -273,7 +280,11 @@ export function computeYearEndTax(
 
   const settle = (useStandard: boolean): YearEndTaxBreakdown => {
     const appliedInsurance = useStandard ? 0 : insuranceDeduction;
-    const appliedHousing = useStandard ? 0 : housingDeduction;
+    // 청약저축(조특법 제87조)은 표준세액공제와 병용할 수 있다.
+    // 전세대출(소득세법 제52조)은 특별소득공제 경로에서만 적용한다.
+    const appliedHousing = floorWon(
+      Math.min(subscription + (useStandard ? 0 : loan), policy.housing.combinedCap),
+    );
     const taxBase = Math.max(
       0,
       earnedIncome -
@@ -432,6 +443,9 @@ export function calculateYearEndTax(
     "부양가족의 소득·나이 요건과 항목별 세부 요건은 판단하지 않고 입력한 값을 그대로 썼습니다.",
     "주택담보대출 이자, 중소기업 취업자 감면, 난임·산후조리 등 따로 계산하는 항목은 포함하지 않았습니다.",
   ];
+  if (input.hometownDonation > 0 && input.hometownDonationRegion === "disaster") {
+    warnings.push("고향사랑기부금 전액이 특별재난지역 선포일부터 3개월 이내의 적격 기부라고 보고 20만원 초과분에 30%를 적용했습니다. 기부영수증으로 적용 요건을 확인하세요.");
+  }
   if (input.monthlyRent > 0 && input.totalSalary > policy.rent.salaryCutoff) {
     warnings.push(
       `총급여가 ${(policy.rent.salaryCutoff / 10_000).toLocaleString("ko-KR")}만원을 넘어 월세 세액공제를 적용하지 않았습니다.`,

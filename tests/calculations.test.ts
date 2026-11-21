@@ -361,7 +361,7 @@ test("급여 계산은 기준이 고시되지 않은 달을 거부한다", () =>
   assert.doesNotThrow(() => calculateSalary({ ...common, effectiveMonth: "2027-06" }));
   assert.throws(
     () => calculateSalary({ ...common, effectiveMonth: "2027-07" }),
-    /아직 고시되지 않아/,
+    /적용 기간은 2027년 6월까지/,
   );
   assert.throws(() => calculateSalary({ ...common, effectiveMonth: "2025-12" }), /2026년 1월 이전/);
   assert.throws(() => calculateSalary({ ...common, effectiveMonth: "2026-13" }), /YYYY-MM/);
@@ -396,7 +396,7 @@ test("2027년 최저임금으로 월 환산과 미달 여부를 판단한다", (
   assert.match(weekly.warnings.join(" "), /2027년 최저임금/);
 });
 
-test("2027년 퇴사자의 구직급여는 상한 고시 전이라 하한액으로 계산하고 알린다", () => {
+test("2027년 구직급여 상한 미확인 시 일액과 총액을 하한 기준으로 명시한다", () => {
   const result = calculateUnemploymentBenefit({
     averageMonthlyWage: 5_000_000,
     referenceDays: 92,
@@ -410,7 +410,11 @@ test("2027년 퇴사자의 구직급여는 상한 고시 전이라 하한액으�
   assert.equal(result.primary.amount, 68_480);
   assert.equal(amountFor(result, "1일 하한액"), 68_480);
   assert.equal(result.rows.some((row) => row.label === "1일 상한액"), false);
-  assert.match(result.warnings.join(" "), /상한액이 아직 정해지지 않아/);
+  assert.match(result.primary.label, /하한 기준/);
+  assert.match(result.primary.note ?? "", /참고값/);
+  assert.equal(amountFor(result, "하한 기준 총액"), 68_480 * 150);
+  assert.equal(result.rows.some((row) => row.label === "총 예상 구직급여"), false);
+  assert.match(result.warnings.join(" "), /확정 근거를 확인하지 못해/);
 
   const year2026 = calculateUnemploymentBenefit({
     averageMonthlyWage: 5_000_000,
@@ -421,4 +425,20 @@ test("2027년 퇴사자의 구직급여는 상한 고시 전이라 하한액으�
     separationYear: 2026,
   });
   assert.equal(year2026.primary.amount, 68_100);
+  assert.equal(year2026.primary.label, "1일 예상 구직급여");
+  assert.equal(amountFor(year2026, "총 예상 구직급여"), 68_100 * 150);
+});
+
+test("상한 미확인 시 단시간·저임금도 하한 기준임을 표시한다", () => {
+  const result = calculateUnemploymentBenefit({
+    averageMonthlyWage: 500_000,
+    referenceDays: 92,
+    dailyHours: 4,
+    ageGroup: "over50",
+    insuredPeriod: "over10",
+    separationYear: 2027,
+  });
+  assert.equal(result.primary.amount, 10_700 * 0.8 * 4);
+  assert.match(result.primary.label, /하한 기준/);
+  assert.equal(amountFor(result, "하한 기준 총액"), 34_240 * 270);
 });

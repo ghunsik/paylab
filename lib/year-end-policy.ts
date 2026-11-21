@@ -62,6 +62,7 @@ export type YearEndPolicy = {
   };
   readonly hometownDonation: {
     readonly cap: number;
+    readonly disasterExcessRate: number;
     /** 아래에서부터 순서대로 채우는 구간 */
     readonly tiers: ReadonlyArray<{ readonly upTo: number | null; readonly rate: number }>;
   };
@@ -183,6 +184,7 @@ export const YEAR_END_2026 = {
   },
   hometownDonation: {
     cap: 20_000_000,
+    disasterExcessRate: 0.3,
     tiers: [
       { upTo: 100_000, rate: 100 / 110 },
       { upTo: 200_000, rate: 0.4 },
