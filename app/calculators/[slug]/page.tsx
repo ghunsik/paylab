@@ -7,8 +7,8 @@ import { SiteHeader } from "@/app/components/SiteHeader";
 import {
   calculatorBySlug,
   calculators,
+  SOCIAL_IMAGE,
   type CalculatorSlug,
-  EFFECTIVE_LABEL,
   VERIFIED_AT,
 } from "@/lib/site-content";
 
@@ -32,6 +32,7 @@ export async function generateMetadata({
       title: `${meta.title} | 월급연구소`,
       description: meta.description,
       url: `/calculators/${meta.slug}`,
+      images: [SOCIAL_IMAGE],
     },
   };
 }
@@ -45,91 +46,70 @@ export default async function CalculatorPage({
   const calculator = calculatorBySlug[slug as CalculatorSlug];
   if (!calculator) notFound();
 
-  const related = calculators.filter(
-    (item) => item.group === calculator.group && item.slug !== calculator.slug,
-  );
+  const related = calculator.related.map((item) => calculatorBySlug[item]);
 
   return (
     <>
       <SiteHeader />
-      <main id="main-content">
-        <section className="route-hero section-shell">
-          <nav className="breadcrumbs" aria-label="현재 위치">
-            <Link href="/">홈</Link>
-            <span aria-hidden="true">/</span>
-            <Link href="/#calculators">계산기</Link>
-            <span aria-hidden="true">/</span>
+      <main id="main-content" className="wrap">
+        <div className="page-head">
+          <nav className="crumbs" aria-label="현재 위치">
+            <Link href="/">홈</Link> › <Link href="/#calculators">계산기</Link> ›{" "}
             <span aria-current="page">{calculator.shortTitle}</span>
           </nav>
-          <div className="route-hero-grid">
-            <div>
-              <div className="eyebrow">
-                <span className="status-dot" aria-hidden="true" />
-                {EFFECTIVE_LABEL} · 최종 검토 {VERIFIED_AT.replaceAll("-", ".")}
+          <h1>{calculator.title}</h1>
+          <p className="lead">{calculator.description}</p>
+          <p className="basis">
+            {calculator.basis} · {VERIFIED_AT.replaceAll("-", ".")} 확인
+          </p>
+        </div>
+
+        <CalculatorPanel slug={calculator.slug} />
+
+        <section className="block">
+          <h2>어떻게 계산하나요</h2>
+          <div className="prose">
+            {calculator.how.map((item) => (
+              <div key={item.heading}>
+                <h3>{item.heading}</h3>
+                {item.body.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+                {item.formula ? <p className="formula">{item.formula}</p> : null}
               </div>
-              <span className="route-index">{calculator.index}</span>
-              <h1>{calculator.title}</h1>
-              <p>{calculator.description}</p>
-            </div>
-            <aside className="route-note">
-              <strong>결과를 읽는 법</strong>
-              <p>
-                이 계산기는 법적 확정액이 아닌 예상 도구입니다. 결과 아래의 가정과 제외
-                조건을 함께 확인해 주세요.
-              </p>
-            </aside>
+            ))}
           </div>
         </section>
 
-        <section className="route-calculator section-shell">
-          <CalculatorPanel slug={calculator.slug} />
-        </section>
-
-        <section className="source-section section-shell">
-          <div className="section-heading split-heading">
-            <div>
-              <span className="section-kicker">SOURCES &amp; METHOD</span>
-              <h2>이 계산의 근거</h2>
-            </div>
-            <p>법 이름만 적지 않고 실제 확인한 정부·공단 자료로 연결합니다.</p>
-          </div>
-          <div className="source-grid">
-            <div className="source-list">
-              {calculator.sources.map((source, index) => (
-                <a href={source.href} target="_blank" rel="noreferrer" key={source.href}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{source.label}</strong>
-                  <span aria-hidden="true">↗</span>
+        <section className="block">
+          <h2>근거 자료</h2>
+          <ul className="source-list">
+            {calculator.sources.map((source) => (
+              <li key={source.href}>
+                <a href={source.href} target="_blank" rel="noreferrer">
+                  {source.label}
                 </a>
-              ))}
-            </div>
-            <div className="method-summary">
-              <strong>PAYLAB 원칙</strong>
-              <ul>
-                <li>효력일이 있는 정책은 입력한 날짜에 맞춰 선택</li>
-                <li>입력 오류와 적용 제외 조건을 결과에서 경고</li>
-                <li>실제 명세서와 달라질 수 있는 항목은 예상치로 표시</li>
-              </ul>
-              <Link href="/methodology">전체 검증 방법 →</Link>
-            </div>
-          </div>
+              </li>
+            ))}
+          </ul>
+          <Link className="more-link" href="/methodology">
+            계산 방법과 한계 전체 보기
+          </Link>
         </section>
 
         {related.length ? (
-          <section className="related-tools section-shell">
-            <div className="section-heading">
-              <span className="section-kicker">RELATED TOOLS</span>
-              <h2>함께 보면 좋은 계산기</h2>
-            </div>
-            <div className="related-grid">
+          <section className="block">
+            <h2>같이 많이 찾는 계산기</h2>
+            <ul className="tool-list">
               {related.map((item) => (
-                <Link href={`/calculators/${item.slug}`} key={item.slug}>
-                  <span>{item.index}</span>
-                  <strong>{item.shortTitle}</strong>
-                  <p>{item.question}</p>
-                </Link>
+                <li key={item.slug}>
+                  <Link href={`/calculators/${item.slug}`}>
+                    <strong>{item.title}</strong>
+                    <span>{item.question}</span>
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
         ) : null}
       </main>

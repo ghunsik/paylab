@@ -11,14 +11,13 @@ export default function TermsPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main-content" className="legal-page section-shell">
-        <header>
-          <span className="section-kicker">TERMS</span>
+      <main id="main-content" className="legal-page wrap">
+        <header className="page-head">
           <h1>이용약관·면책조항</h1>
           <p>시행일 2026년 7월 11일</p>
         </header>
 
-        <article className="legal-content">
+        <article className="legal-content prose">
           <section>
             <h2>1. 서비스의 목적</h2>
             <p>

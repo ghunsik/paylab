@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   POLICY_2026,
+  POLICY_2027,
   POLICY_VERSION,
   calculateAnnualLeave,
   calculateHourlyPay,
@@ -312,4 +313,132 @@ test("휴업수당은 평균임금 70%와 더 낮은 통상임금을 비교한�
     /휴업일수/,
   );
   assertCommonResult(ordinaryApplied);
+});
+
+test("2027 정책 상수 가운데 확정된 값을 고정한다", () => {
+  assert.equal(POLICY_2027.minimumWage.hourly, 10_700);
+  assert.equal(POLICY_2027.minimumWage.monthlyAmount, 10_700 * 209);
+  assert.equal(POLICY_2027.insurance.nationalPension.employeeRate, 0.05);
+  assert.equal(POLICY_2027.insurance.health.employeeRate, 0.03595);
+  assert.equal(POLICY_2027.insurance.longTermCare.contributionRate, 0.009994);
+  // 고시 전이라 값을 지어내지 않고 비워 둔다.
+  assert.equal(POLICY_2027.unemployment.dailyUpper, null);
+  assert.ok(POLICY_2027.pending.length > 0);
+});
+
+test("급여 계산은 2026년 12월과 2027년 1월의 요율을 구분한다", () => {
+  const common = {
+    basis: "monthly" as const,
+    gross: 3_000_000,
+    nonTaxableMonthly: 0,
+    dependents: 1,
+    children: 0,
+  };
+  const december = calculateSalary({ ...common, effectiveMonth: "2026-12" });
+  const january = calculateSalary({ ...common, effectiveMonth: "2027-01" });
+
+  assert.equal(amountFor(december, "국민연금"), 142_500);
+  assert.equal(amountFor(january, "국민연금"), 150_000);
+  assert.equal(amountFor(december, "건강보험"), 107_850);
+  assert.equal(amountFor(january, "건강보험"), 107_850);
+  assert.equal(amountFor(december, "장기요양보험"), 14_172);
+  assert.equal(amountFor(january, "장기요양보험"), 14_991);
+  assert.equal(amountFor(december, "고용보험"), 27_000);
+  assert.equal(amountFor(january, "고용보험"), 27_000);
+  assert.ok(january.primary.amount < december.primary.amount);
+  assert.match(january.warnings.join(" "), /2027년/);
+  assert.doesNotMatch(december.warnings.join(" "), /2027년/);
+});
+
+test("급여 계산은 기준이 고시되지 않은 달을 거부한다", () => {
+  const common = {
+    basis: "monthly" as const,
+    gross: 3_000_000,
+    nonTaxableMonthly: 0,
+    dependents: 1,
+    children: 0,
+  };
+  assert.doesNotThrow(() => calculateSalary({ ...common, effectiveMonth: "2027-06" }));
+  assert.throws(
+    () => calculateSalary({ ...common, effectiveMonth: "2027-07" }),
+    /적용 기간은 2027년 6월까지/,
+  );
+  assert.throws(() => calculateSalary({ ...common, effectiveMonth: "2025-12" }), /2026년 1월 이전/);
+  assert.throws(() => calculateSalary({ ...common, effectiveMonth: "2026-13" }), /YYYY-MM/);
+});
+
+test("2027년 최저임금으로 월 환산과 미달 여부를 판단한다", () => {
+  const atMinimum = calculateHourlyPay({
+    hourlyWage: 10_700,
+    weeklyHours: 40,
+    workdaysPerWeek: 5,
+    attendedAllDays: true,
+    year: 2027,
+  });
+  assert.equal(atMinimum.primary.amount, 2_236_300);
+  assert.equal(atMinimum.warnings.length, 0);
+
+  const lastYearsWage = calculateHourlyPay({
+    hourlyWage: 10_320,
+    weeklyHours: 40,
+    workdaysPerWeek: 5,
+    attendedAllDays: true,
+    year: 2027,
+  });
+  assert.match(lastYearsWage.warnings.join(" "), /2027년 최저임금 10,700원/);
+
+  const weekly = calculateWeeklyHolidayPay({
+    hourlyWage: 10_320,
+    weeklyHours: 40,
+    attendedAllDays: true,
+    year: 2027,
+  });
+  assert.match(weekly.warnings.join(" "), /2027년 최저임금/);
+});
+
+test("2027년 구직급여 상한 미확인 시 일액과 총액을 하한 기준으로 명시한다", () => {
+  const result = calculateUnemploymentBenefit({
+    averageMonthlyWage: 5_000_000,
+    referenceDays: 92,
+    dailyHours: 8,
+    ageGroup: "under50",
+    insuredPeriod: "1to3",
+    separationYear: 2027,
+  });
+
+  // 10,700원 × 80% × 8시간
+  assert.equal(result.primary.amount, 68_480);
+  assert.equal(amountFor(result, "1일 하한액"), 68_480);
+  assert.equal(result.rows.some((row) => row.label === "1일 상한액"), false);
+  assert.match(result.primary.label, /하한 기준/);
+  assert.match(result.primary.note ?? "", /참고값/);
+  assert.equal(amountFor(result, "하한 기준 총액"), 68_480 * 150);
+  assert.equal(result.rows.some((row) => row.label === "총 예상 구직급여"), false);
+  assert.match(result.warnings.join(" "), /확정 근거를 확인하지 못해/);
+
+  const year2026 = calculateUnemploymentBenefit({
+    averageMonthlyWage: 5_000_000,
+    referenceDays: 92,
+    dailyHours: 8,
+    ageGroup: "under50",
+    insuredPeriod: "1to3",
+    separationYear: 2026,
+  });
+  assert.equal(year2026.primary.amount, 68_100);
+  assert.equal(year2026.primary.label, "1일 예상 구직급여");
+  assert.equal(amountFor(year2026, "총 예상 구직급여"), 68_100 * 150);
+});
+
+test("상한 미확인 시 단시간·저임금도 하한 기준임을 표시한다", () => {
+  const result = calculateUnemploymentBenefit({
+    averageMonthlyWage: 500_000,
+    referenceDays: 92,
+    dailyHours: 4,
+    ageGroup: "over50",
+    insuredPeriod: "over10",
+    separationYear: 2027,
+  });
+  assert.equal(result.primary.amount, 10_700 * 0.8 * 4);
+  assert.match(result.primary.label, /하한 기준/);
+  assert.equal(amountFor(result, "하한 기준 총액"), 34_240 * 270);
 });

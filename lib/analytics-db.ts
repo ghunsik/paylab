@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import type { AnalyticsEvent, AnalyticsMetric } from "@/lib/analytics";
+import { isAnalyticsMetric, type AnalyticsEvent, type AnalyticsMetric } from "@/lib/analytics";
 
 export type DailyAnalytics = {
   day: string;
@@ -21,7 +21,7 @@ export type AnalyticsDashboard = {
   calculators: PathAnalytics[];
 };
 
-type MetricTotalRow = { metric: AnalyticsMetric; total: number };
+type AggregateRow = Record<string, unknown>;
 
 function getDatabase(): D1Database {
   if (!env.DB) {
@@ -39,10 +39,12 @@ function kstDay(date = new Date()): string {
   }).format(date);
 }
 
-function metricRecord(rows: MetricTotalRow[]): Record<AnalyticsMetric, number> {
+function metricRecord(rows: AggregateRow[]): Record<AnalyticsMetric, number> {
   const result: Record<AnalyticsMetric, number> = { pageview: 0, calculation: 0 };
   for (const row of rows) {
-    if (row.metric in result) result[row.metric] = Number(row.total) || 0;
+    if (isAnalyticsMetric(row.metric)) {
+      result[row.metric] = Number(row.total) || 0;
+    }
   }
   return result;
 }
@@ -107,26 +109,24 @@ export async function getAnalyticsDashboard(periodDays = 30): Promise<AnalyticsD
   ];
 
   const [totalsResult, todayResult, dailyResult, pagePathsResult, calculatorsResult] =
-    await database.batch(statements);
+    await database.batch<AggregateRow>(statements);
 
-  const totals = (totalsResult.results ?? []) as MetricTotalRow[];
-  const today = (todayResult.results ?? []) as MetricTotalRow[];
-  const daily = (dailyResult.results ?? []).map((row) => ({
+  const daily = dailyResult.results.map((row) => ({
     day: String(row.day),
     pageviews: Number(row.pageviews) || 0,
     calculations: Number(row.calculations) || 0,
   }));
-  const toPaths = (rows: Record<string, unknown>[]) => rows.map((row) => ({
+  const toPaths = (rows: AggregateRow[]) => rows.map((row) => ({
     path: String(row.path),
     total: Number(row.total) || 0,
   }));
 
   return {
     periodDays: safePeriodDays,
-    totals: metricRecord(totals),
-    today: metricRecord(today),
+    totals: metricRecord(totalsResult.results),
+    today: metricRecord(todayResult.results),
     daily,
-    pagePaths: toPaths((pagePathsResult.results ?? []) as Record<string, unknown>[]),
-    calculators: toPaths((calculatorsResult.results ?? []) as Record<string, unknown>[]),
+    pagePaths: toPaths(pagePathsResult.results),
+    calculators: toPaths(calculatorsResult.results),
   };
 }

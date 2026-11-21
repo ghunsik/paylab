@@ -15,6 +15,7 @@ const PAGEVIEW_PATHS = new Set([
   "/privacy",
   "/terms",
   "/calculators/salary",
+  "/calculators/year-end-tax",
   "/calculators/hourly",
   "/calculators/severance",
   "/calculators/unemployment",
@@ -26,9 +27,8 @@ const CALCULATOR_PATHS = new Set(
   [...PAGEVIEW_PATHS].filter((path) => path.startsWith("/calculators/")),
 );
 
-function isAnalyticsMetric(value: unknown): value is AnalyticsMetric {
-  return typeof value === "string" &&
-    ANALYTICS_METRICS.includes(value as AnalyticsMetric);
+export function isAnalyticsMetric(value: unknown): value is AnalyticsMetric {
+  return ANALYTICS_METRICS.some((metric) => metric === value);
 }
 
 export function normalizeAnalyticsPath(value: unknown): string | null {

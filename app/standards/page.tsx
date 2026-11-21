@@ -1,120 +1,199 @@
+import { AnnualStandards } from "@/app/components/AnnualStandards";
 import type { Metadata } from "next";
 import { SiteFooter } from "@/app/components/SiteFooter";
 import { SiteHeader } from "@/app/components/SiteHeader";
-import { coreStandards, VERIFIED_AT } from "@/lib/site-content";
+import { POLICY_2026, POLICY_2027, POLICY_VERSION } from "@/lib/policy";
+import { updates, VERIFIED_AT } from "@/lib/site-content";
 
 export const metadata: Metadata = {
-  title: "2026년 급여·보험·수당 기준",
-  description: "월급연구소 계산기에 적용한 2026년 최저임금, 4대보험, 실업급여 기준과 공식 출처",
+  title: "적용 기준: 2026·2027년 최저임금, 4대보험, 연말정산",
+  description:
+    "월급연구소 계산기에 쓰는 2026년·2027년 최저임금, 4대보험료율, 구직급여 상·하한, 연말정산 공제 기준과 출처를 모았습니다.",
   alternates: { canonical: "/standards" },
 };
 
-const standards = [
+const won = (value: number) => `${value.toLocaleString("ko-KR")}원`;
+
+const pensionBases = [
+  ...POLICY_2026.insurance.nationalPension.basePeriods,
+  ...POLICY_2027.insurance.nationalPension.basePeriods,
+];
+
+const yearEndRows: Array<{ label: string; value: string; note?: string }> = [
   {
-    category: "임금",
-    title: "2026년 최저임금",
-    value: "시간당 10,320원",
-    detail: "8시간 일급 82,560원 · 월 209시간 2,156,880원",
-    effective: "2026.01.01—12.31",
-    source: "https://www.minimumwage.go.kr/customer/notice/view.do?bultnId=4657",
+    label: "자녀 세액공제",
+    value: "1명 25만원, 2명 55만원, 3명부터 1명당 40만원 추가",
+    note: "2016년 12월 31일 이전 출생 자녀가 대상입니다. 2025년 귀속까지는 8세 이상이었습니다.",
   },
   {
-    category: "사회보험",
-    title: "국민연금 근로자 부담",
-    value: "기준소득월액의 4.75%",
-    detail: "2026.1~6: 40만~637만원 · 2026.7~12: 41만~659만원",
-    effective: "2026.07 상·하한 변경",
-    source: "https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0038M0.do?menuId=MN24001113&tab=tab5",
+    label: "신용카드 등 소득공제",
+    value: "총급여의 25% 초과분에 신용카드 15%, 체크카드·현금영수증 30%, 전통시장·대중교통 40%",
+    note: "기본 한도 300만원(총급여 7,000만원 초과는 250만원). 자녀 1명당 50만원(25만원)씩, 2명까지 한도가 늘어납니다.",
   },
   {
-    category: "사회보험",
-    title: "건강보험 근로자 부담",
-    value: "보수월액의 3.595%",
-    detail: "총 보험료율 7.19%, 근로자와 사용자가 절반씩 부담",
-    effective: "2026.01.01—",
-    source: "https://www.law.go.kr/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1001023443",
+    label: "의료비 세액공제",
+    value: "총급여의 3% 초과분의 15%",
+    note: "본인·연초 6세 이하·연말 65세 이상·장애인·산정특례 대상 중증질환자 등은 한도 없음. 그 밖의 가족은 연 700만원 한도",
+  },
+  { label: "교육비 세액공제", value: "15%" },
+  { label: "보장성 보험료 세액공제", value: "12%, 연 100만원 한도" },
+  { label: "기부금 세액공제", value: "15%, 1,000만원 초과분 30%" },
+  {
+    label: "고향사랑기부금",
+    value: "10만원까지 전액, 10만~20만원 40%, 20만원 초과 15%",
+    note: "특별재난지역 선포일부터 3개월 이내 적격 기부만 있는 경우 20만원 초과분 30%. 기간 밖 기부는 일반 요율. 두 종류가 섞이고 합계 20만원을 넘으면 홈택스에서 계산해 주세요.",
   },
   {
-    category: "사회보험",
-    title: "장기요양보험",
-    value: "건강보험료의 약 13.14%",
-    detail: "공식식: 건강보험료 × 0.9448% ÷ 7.19%",
-    effective: "2026.01.01—",
-    source: "https://edi.nhis.or.kr/portal/images/popup/20251204_pop01longdesc.html",
+    label: "월세 세액공제",
+    value: "15%(총급여 5,500만원 이하 17%), 연 1,000만원 한도",
+    note: "총급여 8,000만원 이하 무주택 세대주",
   },
   {
-    category: "사회보험",
-    title: "고용보험 근로자 부담",
-    value: "보수의 0.9%",
-    detail: "실업급여 보험료 총 1.8% 중 근로자 부담분",
-    effective: "2026년 현재",
-    source: "https://law.go.kr/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000630708",
+    label: "연금계좌 세액공제",
+    value: "12%(총급여 5,500만원 이하 15%)",
+    note: "연금저축 600만원, IRP와 합쳐 900만원 한도",
   },
   {
-    category: "퇴사",
-    title: "구직급여 상·하한",
-    value: "상한 68,100원 / 일",
-    detail: "하한은 최저임금 × 80% × 1일 소정근로시간",
-    effective: "2026.01.01 이후 이직자",
-    source: "https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=18736",
+    label: "주택청약·전세대출",
+    value: "납입액·상환액의 40% 소득공제, 합쳐서 연 400만원 한도",
+    note: "주택청약은 연 300만원 납입분까지, 총급여 7,000만원 이하",
   },
+  { label: "결혼 세액공제", value: "50만원", note: "2026년 혼인신고분까지 적용됩니다." },
+  { label: "표준 세액공제", value: "13만원", note: "특별소득·특별세액·월세 공제를 받지 않을 때. 주택청약저축 소득공제는 함께 적용 가능" },
+];
+
+const sources = [
+  ...POLICY_2026.sources.filter((source) => !POLICY_2027.sources.some((next) => next.url === source.url)),
+  ...POLICY_2027.sources,
+  { label: "소득세법 제59조의4 — 의료비 및 표준세액공제 (2026.11.21 확인)", url: "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1034037519" },
+  { label: "조세특례제한법 제87조 — 주택청약저축 소득공제 (2026.11.21 확인)", url: "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?lsJoLnkSeq=1031132127" },
+  { label: "조세특례제한법 제58조 — 고향사랑기부금 (2026.11.21 확인)", url: "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029627749" },
+  { label: "조세특례제한법 시행령 제53조의2 — 특별재난지역 기부 기간 (2026.11.21 확인)", url: "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lspttninfSeq=194315" },
 ];
 
 export default function StandardsPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main-content">
-        <section className="document-hero section-shell">
-          <span className="section-kicker">POLICY INDEX / 2026</span>
-          <h1>계산에 쓰인 숫자를<br />한곳에 모았습니다.</h1>
-          <p>
-            같은 2026년이라도 적용 월과 이직일에 따라 기준이 달라집니다. PAYLAB은
-            효력일을 계산 규칙과 함께 관리합니다.
+      <main id="main-content" className="wrap">
+        <div className="page-head">
+          <h1>적용 기준</h1>
+          <p className="lead">
+            계산기에 들어 있는 숫자와 출처입니다. 같은 해라도 급여 귀속월이나 퇴사일에
+            따라 적용되는 값이 다릅니다.
           </p>
-          <div className="document-meta">
-            <span>최종 검토 {VERIFIED_AT.replaceAll("-", ".")}</span>
-            <span>공식 1차 자료 기준</span>
-            <span>정책 버전 2026.07.11</span>
+          <p className="basis">
+            {VERIFIED_AT.replaceAll("-", ".")} 확인 · 기준 데이터 {POLICY_VERSION}
+          </p>
+        </div>
+
+        <section className="block">
+          <h2>최저임금·4대보험·구직급여</h2>
+          <AnnualStandards />
+        </section>
+
+        <section className="block">
+          <h2>국민연금 기준소득월액</h2>
+          <p>
+            국민연금은 이 범위 안의 금액에만 요율을 곱합니다. 해마다 7월에 바뀝니다.
+          </p>
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">적용 기간</th>
+                  <th scope="col">하한</th>
+                  <th scope="col">상한</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pensionBases.map((period) => (
+                  <tr key={period.fromMonth}>
+                    <th scope="row">
+                      {period.fromMonth.replace("-", ".")} ~ {period.toMonth.replace("-", ".")}
+                    </th>
+                    <td className="num">{won(period.minimum)}</td>
+                    <td className="num">{won(period.maximum)}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <th scope="row">2027.07 이후</th>
+                  <td className="num" colSpan={2}>
+                    확인한 공단 자료는 2027년 6월까지 적용됩니다.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
-        <section className="standards-list section-shell">
-          {standards.map((standard, index) => (
-            <article className="standard-row" key={standard.title}>
-              <span className="standard-number">{String(index + 1).padStart(2, "0")}</span>
-              <div>
-                <span className="standard-category">{standard.category}</span>
-                <h2>{standard.title}</h2>
-                <p>{standard.detail}</p>
-              </div>
-              <div className="standard-value">
-                <strong>{standard.value}</strong>
-                <span>{standard.effective}</span>
-              </div>
-              <a href={standard.source} target="_blank" rel="noreferrer" aria-label={`${standard.title} 공식 출처`}>
-                공식 출처 ↗
-              </a>
-            </article>
-          ))}
-        </section>
-
-        <section className="standards-note section-shell">
-          <h2>요율이 같아도 실제 공제액은 다를 수 있습니다.</h2>
-          <p>
-            국민연금 기준소득월액, 건강보험 보수월액, 가입 예외, 정산과 원 단위 처리에
-            따라 급여명세서의 고지액과 예상 결과가 달라질 수 있습니다. 이 페이지는
-            계산기에 사용한 기준을 투명하게 공개하기 위한 자료입니다.
-          </p>
-          <div className="standards-mini-grid">
-            {coreStandards.map((item) => (
-              <div key={item.label}>
-                <span>{item.label}</span>
-                <strong>{item.value}</strong>
-                <small>{item.note}</small>
-              </div>
+        <section className="block">
+          <h2>2027년 적용 근거를 추가로 확인할 항목</h2>
+          <ul className="source-list">
+            {POLICY_2027.pending.map((item) => (
+              <li key={item}>{item}</li>
             ))}
+          </ul>
+        </section>
+
+        <section className="block">
+          <h2>연말정산 (2026년 귀속)</h2>
+          <p>2027년 1~2월에 하는 연말정산에 적용되는 기준입니다.</p>
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">항목</th>
+                  <th scope="col">기준</th>
+                </tr>
+              </thead>
+              <tbody>
+                {yearEndRows.map((row) => (
+                  <tr key={row.label}>
+                    <th scope="row">{row.label}</th>
+                    <td>
+                      {row.value}
+                      {row.note ? <small>{row.note}</small> : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        </section>
+
+        <section className="block">
+          <h2>출처</h2>
+          <ul className="source-list">
+            {sources.map((source) => (
+              <li key={source.url}>
+                <a href={source.url} target="_blank" rel="noreferrer">
+                  {source.label}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a
+                href="https://www.korea.kr/news/policyNewsView.do?newsId=148974171"
+                target="_blank"
+                rel="noreferrer"
+              >
+                국세청 2026년 귀속 연말정산 미리보기 안내
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <section className="block">
+          <h2>고친 기록</h2>
+          <ul className="updates">
+            {updates.map((item) => (
+              <li key={item.date}>
+                <time dateTime={item.date}>{item.date.replaceAll("-", ".")}</time>
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ul>
         </section>
       </main>
       <SiteFooter />
