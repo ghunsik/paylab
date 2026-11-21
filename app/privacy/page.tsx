@@ -11,14 +11,13 @@ export default function PrivacyPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main-content" className="legal-page section-shell">
-        <header>
-          <span className="section-kicker">PRIVACY</span>
+      <main id="main-content" className="legal-page wrap">
+        <header className="page-head">
           <h1>개인정보처리방침</h1>
           <p>시행일: 2026년 7월 11일</p>
         </header>
 
-        <article className="legal-content">
+        <article className="legal-content prose">
           <section>
             <h2>1. 계산 정보</h2>
             <p>

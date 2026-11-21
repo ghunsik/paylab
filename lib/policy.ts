@@ -1,4 +1,4 @@
-export const POLICY_VERSION = "2026.07.11";
+export const POLICY_VERSION = "2026.11.21";
 
 export type PolicySource = {
   readonly label: string;
@@ -49,7 +49,8 @@ export type LaborPolicy = {
   };
   readonly unemployment: {
     readonly replacementRate: number;
-    readonly dailyUpper: number;
+    /** 아직 고시되지 않은 해는 null */
+    readonly dailyUpper: number | null;
     readonly lowerMinimumWageRatio: number;
     readonly maximumDailyHours: number;
     readonly benefitDays: {
@@ -69,6 +70,8 @@ export type LaborPolicy = {
     };
     readonly brackets: readonly TaxBracket[];
   };
+  /** 조사 시점에 확정되지 않아 전년도 값을 그대로 쓴 항목 */
+  readonly pending: readonly string[];
   readonly sources: readonly PolicySource[];
 };
 
@@ -82,7 +85,7 @@ export type InsuredPeriodKey =
 export const POLICY_2026 = {
   version: POLICY_VERSION,
   year: 2026,
-  verifiedAt: "2026-07-11",
+  verifiedAt: "2026-11-21",
   currency: "KRW",
   minimumWage: {
     hourly: 10_320,
@@ -164,6 +167,7 @@ export const POLICY_2026 = {
       { upTo: null, rate: 0.45, quickDeduction: 65_940_000 },
     ],
   },
+  pending: [],
   sources: [
     {
       label: "국민연금공단 2026년 보험료율 및 기준소득월액",
@@ -187,3 +191,107 @@ export const POLICY_2026 = {
     },
   ],
 } as const satisfies LaborPolicy;
+
+export const POLICY_2027 = {
+  version: POLICY_VERSION,
+  year: 2027,
+  verifiedAt: "2026-11-21",
+  currency: "KRW",
+  minimumWage: {
+    hourly: 10_700,
+    monthlyHours: 209,
+    monthlyAmount: 2_236_300,
+  },
+  insurance: {
+    nationalPension: {
+      employeeRate: 0.05,
+      basePeriods: [
+        {
+          fromMonth: "2027-01",
+          toMonth: "2027-06",
+          minimum: 410_000,
+          maximum: 6_590_000,
+        },
+      ],
+    },
+    health: {
+      employeeRate: 0.03595,
+      totalRate: 0.0719,
+      employeeMonthlyMinimum: 10_080,
+      employeeMonthlyMaximum: 4_591_740,
+    },
+    longTermCare: {
+      contributionRate: 0.009994,
+      healthContributionRate: 0.0719,
+    },
+    employment: {
+      employeeRate: 0.009,
+    },
+  },
+  unemployment: {
+    replacementRate: 0.6,
+    dailyUpper: null,
+    lowerMinimumWageRatio: 0.8,
+    maximumDailyHours: 8,
+    benefitDays: POLICY_2026.unemployment.benefitDays,
+  },
+  incomeTaxEstimate: POLICY_2026.incomeTaxEstimate,
+  pending: [
+    "건강보험료 상·하한: 2027년 고시 전이라 2026년 값을 씁니다.",
+    "고용보험료율: 근로자 1.0% 인상안이 발표됐지만 시행령 개정 전이라 0.9%를 씁니다.",
+    "구직급여 상한액: 2027년 금액이 정해지지 않았습니다.",
+    "국민연금 기준소득월액: 2027년 7월 이후 상·하한은 고시 전입니다.",
+    "소득세: 2026년 세법개정안이 국회를 통과하기 전이라 2026년 세율·공제를 씁니다.",
+  ],
+  sources: [
+    {
+      label: "고용노동부 2027년 적용 최저임금 고시",
+      url: "https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=19744",
+    },
+    {
+      label: "국민연금공단 보험료율 및 기준소득월액",
+      url: "https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0038M0.do",
+    },
+    {
+      label: "보건복지부 2027년 건강보험료율 결정",
+      url: "https://www.korea.kr/policy/civilView.do?newsId=156780681",
+    },
+    {
+      label: "보건복지부 2027년 장기요양보험료율 결정",
+      url: "https://www.korea.kr/news/policyNewsView.do?newsId=148974757",
+    },
+    {
+      label: "고용노동부 고용보험 제도개편 방안",
+      url: "https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=19866",
+    },
+  ],
+} as const satisfies LaborPolicy;
+
+export type PolicyYear = 2026 | 2027;
+
+export const POLICY_YEARS: readonly PolicyYear[] = [2026, 2027];
+
+/** 급여 귀속월로 고를 수 있는 범위. 국민연금 기준소득월액이 고시된 달까지만 연다. */
+export const FIRST_SUPPORTED_MONTH = "2026-01";
+export const LAST_SUPPORTED_MONTH = "2027-06";
+
+export function policyForYear(year: number): LaborPolicy {
+  if (year === 2026) return POLICY_2026;
+  if (year === 2027) return POLICY_2027;
+  throw new RangeError("적용 연도는 2026년 또는 2027년이어야 합니다.");
+}
+
+export function policyForMonth(month: string): LaborPolicy {
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+    throw new RangeError("적용월은 YYYY-MM 형식이어야 합니다.");
+  }
+  if (month < FIRST_SUPPORTED_MONTH) {
+    throw new RangeError("2026년 1월 이전 급여는 계산할 수 없습니다.");
+  }
+  if (month > LAST_SUPPORTED_MONTH) {
+    throw new RangeError(
+      "2027년 7월 이후는 국민연금 기준소득월액이 아직 고시되지 않아 계산할 수 없습니다.",
+    );
+  }
+  return policyForYear(Number(month.slice(0, 4)));
+}

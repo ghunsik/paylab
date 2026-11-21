@@ -25,9 +25,11 @@ test("server-renders the finished PAYLAB home page", async () => {
 
   const html = await response.text();
   assert.match(html, /PAYLAB/);
-  assert.match(html, /받을 돈을/);
-  assert.match(html, /10초 실수령액 계산/);
+  assert.match(html, /월급 실수령액 계산기/);
+  assert.match(html, /2027년에 바뀌는 숫자/);
+  assert.match(html, /10,700원/);
   assert.match(html, /\/calculators\/severance/);
+  assert.match(html, /\/calculators\/year-end-tax/);
   assert.match(html, /\/og\.png/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 });
@@ -60,4 +62,30 @@ test("calculator routes render unique content", async () => {
   assert.match(html, /퇴직금 계산기/);
   assert.match(html, /근로관계 종료일/);
   assert.match(html, /고용노동부 퇴직금 계산기/);
+});
+
+test("year-end tax calculator route renders its form and method", async () => {
+  const response = await render("/calculators/year-end-tax");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /연말정산 환급액 계산기/);
+  assert.match(html, /2026년 총급여/);
+  assert.match(html, /이미 낸 소득세/);
+  assert.match(html, /신용카드 등 소득공제/);
+});
+
+test("standards page lists both years and unresolved 2027 items", async () => {
+  const response = await render("/standards");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /2,236,300원/);
+  assert.match(html, /아직 정해지지 않은 것/);
+  assert.match(html, /2016년 12월 31일 이전 출생/);
+});
+
+test("pages carry no inline style attributes that the CSP would block", async () => {
+  for (const path of ["/", "/calculators/year-end-tax", "/standards", "/methodology"]) {
+    const html = await (await render(path)).text();
+    assert.doesNotMatch(html, /<[a-z][^>]*\sstyle=/i, path);
+  }
 });

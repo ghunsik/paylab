@@ -1,7 +1,12 @@
 import {
   POLICY_2026,
+  POLICY_2027,
   POLICY_VERSION,
+  policyForMonth,
+  policyForYear,
   type InsuredPeriodKey,
+  type LaborPolicy,
+  type PolicyYear,
 } from "./policy.ts";
 
 export type CalculationUnit = "원" | "일" | "시간" | "%" | "개월" | "년";
@@ -19,6 +24,7 @@ export type CalculationResult = {
     label: string;
     amount: number;
     unit: CalculationUnit;
+    note?: string;
   };
   rows: CalculationRow[];
   assumptions: string[];
@@ -40,6 +46,8 @@ export type HourlyPayInput = {
   weeklyHours: number;
   workdaysPerWeek: number;
   attendedAllDays: boolean;
+  /** 최저임금을 비교할 연도. 기본 2026 */
+  year?: PolicyYear;
 };
 
 export type SeveranceInput = {
@@ -58,6 +66,8 @@ export type UnemploymentBenefitInput = {
   dailyHours: number;
   ageGroup: "under50" | "over50";
   insuredPeriod: InsuredPeriodKey;
+  /** 이직(퇴사)한 연도. 기본 2026 */
+  separationYear?: PolicyYear;
 };
 
 export type AnnualLeaveInput = {
@@ -73,6 +83,8 @@ export type WeeklyHolidayPayInput = {
   hourlyWage: number;
   weeklyHours: number;
   attendedAllDays: boolean;
+  /** 최저임금을 비교할 연도. 기본 2026 */
+  year?: PolicyYear;
 };
 
 export type ShutdownAllowanceInput = {
@@ -224,11 +236,8 @@ function pensionBaseForMonth(effectiveMonth: string): {
   minimum: number;
   maximum: number;
 } {
-  if (!/^2026-(0[1-9]|1[0-2])$/.test(effectiveMonth)) {
-    throw new RangeError("적용월은 2026-01부터 2026-12 사이의 YYYY-MM 형식이어야 합니다.");
-  }
-
-  const period = POLICY_2026.insurance.nationalPension.basePeriods.find(
+  const policy = policyForMonth(effectiveMonth);
+  const period = policy.insurance.nationalPension.basePeriods.find(
     ({ fromMonth, toMonth }) =>
       effectiveMonth >= fromMonth && effectiveMonth <= toMonth,
   );
@@ -360,6 +369,7 @@ export function calculateSalary(input: SalaryInput): CalculationResult {
     throw new RangeError("월 비과세액은 월 세전급여보다 클 수 없습니다.");
   }
   const monthlyTaxable = monthlyGross - input.nonTaxableMonthly;
+  const policy = policyForMonth(input.effectiveMonth);
   const pensionPolicy = pensionBaseForMonth(input.effectiveMonth);
   const rawPensionBase = Math.floor(monthlyTaxable / 1_000) * 1_000;
   const pensionBase =
@@ -367,25 +377,25 @@ export function calculateSalary(input: SalaryInput): CalculationResult {
       ? clamp(rawPensionBase, pensionPolicy.minimum, pensionPolicy.maximum)
       : 0;
   const pension = roundWon(
-    pensionBase * POLICY_2026.insurance.nationalPension.employeeRate,
+    pensionBase * policy.insurance.nationalPension.employeeRate,
   );
   const rawHealth = roundWon(
-    monthlyTaxable * POLICY_2026.insurance.health.employeeRate,
+    monthlyTaxable * policy.insurance.health.employeeRate,
   );
   const health =
     monthlyTaxable > 0
       ? clamp(
           rawHealth,
-          POLICY_2026.insurance.health.employeeMonthlyMinimum,
-          POLICY_2026.insurance.health.employeeMonthlyMaximum,
+          policy.insurance.health.employeeMonthlyMinimum,
+          policy.insurance.health.employeeMonthlyMaximum,
         )
       : 0;
   const longTermCare = roundWon(
-    (health * POLICY_2026.insurance.longTermCare.contributionRate) /
-      POLICY_2026.insurance.longTermCare.healthContributionRate,
+    (health * policy.insurance.longTermCare.contributionRate) /
+      policy.insurance.longTermCare.healthContributionRate,
   );
   const employment = roundWon(
-    monthlyTaxable * POLICY_2026.insurance.employment.employeeRate,
+    monthlyTaxable * policy.insurance.employment.employeeRate,
   );
   const annualInsuranceContributions =
     (pension + health + longTermCare + employment) * 12;
@@ -413,12 +423,17 @@ export function calculateSalary(input: SalaryInput): CalculationResult {
   }
   if (
     monthlyTaxable > 0 &&
-    rawHealth < POLICY_2026.insurance.health.employeeMonthlyMinimum
+    rawHealth < policy.insurance.health.employeeMonthlyMinimum
   ) {
-    warnings.push("건강보험 근로자 부담 하한 10,080원이 적용되었습니다.");
+    warnings.push(`건강보험 근로자 부담 하한 ${policy.insurance.health.employeeMonthlyMinimum.toLocaleString("ko-KR")}원이 적용되었습니다.`);
   }
-  if (rawHealth > POLICY_2026.insurance.health.employeeMonthlyMaximum) {
-    warnings.push("건강보험 근로자 부담 상한 4,591,740원이 적용되었습니다.");
+  if (rawHealth > policy.insurance.health.employeeMonthlyMaximum) {
+    warnings.push(`건강보험 근로자 부담 상한 ${policy.insurance.health.employeeMonthlyMaximum.toLocaleString("ko-KR")}원이 적용되었습니다.`);
+  }
+  if (policy.year === 2027) {
+    warnings.push(
+      "2027년 건강보험료 상·하한, 고용보험료율, 소득세 개정 사항은 아직 확정 전이라 2026년 값을 썼습니다.",
+    );
   }
 
   const assumptions = [
@@ -465,6 +480,7 @@ export function calculateHourlyPay(input: HourlyPayInput): CalculationResult {
   });
   assertBoolean(input.attendedAllDays, "소정근로일 개근 여부");
 
+  const policy = policyForYear(input.year ?? 2026);
   const dailyHours = input.weeklyHours / input.workdaysPerWeek;
   const weeklyBasePay = roundWon(input.hourlyWage * input.weeklyHours);
   const eligibleForWeeklyHoliday = input.weeklyHours >= 15 && input.attendedAllDays;
@@ -476,13 +492,13 @@ export function calculateHourlyPay(input: HourlyPayInput): CalculationResult {
     Math.abs(input.weeklyHours - 40) < Number.EPSILON &&
     Math.abs(weeklyHolidayHours - 8) < Number.EPSILON;
   const monthlyPaidHours = isStandardFullTime
-    ? POLICY_2026.minimumWage.monthlyHours
+    ? policy.minimumWage.monthlyHours
     : (input.weeklyHours + weeklyHolidayHours) * (365 / 7 / 12);
   const monthlyPay = roundWon(input.hourlyWage * monthlyPaidHours);
 
   const warnings: string[] = [];
-  if (input.hourlyWage < POLICY_2026.minimumWage.hourly) {
-    warnings.push(`입력 시급이 2026년 최저임금 ${POLICY_2026.minimumWage.hourly.toLocaleString("ko-KR")}원보다 낮습니다.`);
+  if (input.hourlyWage < policy.minimumWage.hourly) {
+    warnings.push(`입력 시급이 ${policy.year}년 최저임금 ${policy.minimumWage.hourly.toLocaleString("ko-KR")}원보다 낮습니다.`);
   }
   if (input.weeklyHours < 15) {
     warnings.push("주 15시간 미만으로 주휴수당을 포함하지 않았습니다.");
@@ -642,28 +658,40 @@ export function calculateUnemploymentBenefit(
     throw new RangeError("유효하지 않은 고용보험 피보험기간 구분입니다.");
   }
 
+  const policy = policyForYear(input.separationYear ?? 2026);
+  const dailyUpper = policy.unemployment.dailyUpper;
   const averageDailyWage = (input.averageMonthlyWage * 3) / input.referenceDays;
-  const rawDailyBenefit = averageDailyWage * POLICY_2026.unemployment.replacementRate;
+  const rawDailyBenefit = averageDailyWage * policy.unemployment.replacementRate;
   const dailyLower = roundWon(
-    POLICY_2026.minimumWage.hourly *
-      POLICY_2026.unemployment.lowerMinimumWageRatio *
+    policy.minimumWage.hourly *
+      policy.unemployment.lowerMinimumWageRatio *
       input.dailyHours,
   );
+  // 하한액이 상한액보다 크거나 상한액이 아직 고시되지 않은 해에는 하한액을 지급액으로 본다.
+  const lowerExceedsUpper = dailyUpper === null || dailyLower > dailyUpper;
   const dailyBenefit = roundWon(
-    clamp(rawDailyBenefit, dailyLower, POLICY_2026.unemployment.dailyUpper),
+    lowerExceedsUpper
+      ? dailyLower
+      : clamp(rawDailyBenefit, dailyLower, dailyUpper),
   );
   const benefitDays =
-    POLICY_2026.unemployment.benefitDays[input.ageGroup][input.insuredPeriod];
+    policy.unemployment.benefitDays[input.ageGroup][input.insuredPeriod];
   const totalBenefit = dailyBenefit * benefitDays;
 
   const warnings = [
     "비자발적 이직 사유, 피보험단위기간 180일, 재취업 활동 등 실제 수급자격은 판정하지 않습니다.",
     "반복수급자 감액·대기기간·지급 중 취업일은 반영하지 않았습니다.",
   ];
-  if (rawDailyBenefit < dailyLower) {
+  if (dailyUpper === null) {
+    warnings.push(
+      `${policy.year}년 구직급여 상한액이 아직 정해지지 않아 하한액(${dailyLower.toLocaleString("ko-KR")}원)으로 계산했습니다. 평균임금이 높으면 실제 금액은 이보다 많을 수 있습니다.`,
+    );
+  } else if (lowerExceedsUpper) {
+    warnings.push("하한액이 상한액보다 커서 하한액을 적용했습니다.");
+  } else if (rawDailyBenefit < dailyLower) {
     warnings.push("1일 구직급여 하한액이 적용되었습니다.");
-  } else if (rawDailyBenefit > POLICY_2026.unemployment.dailyUpper) {
-    warnings.push("1일 구직급여 상한액 68,100원이 적용되었습니다.");
+  } else if (rawDailyBenefit > dailyUpper) {
+    warnings.push(`1일 구직급여 상한액 ${dailyUpper.toLocaleString("ko-KR")}원이 적용되었습니다.`);
   }
   if (input.referenceDays < 89 || input.referenceDays > 92) {
     warnings.push("통상적인 3개월 역일수(89~92일) 밖의 값이므로 제외기간 여부를 확인하세요.");
@@ -675,18 +703,15 @@ export function calculateUnemploymentBenefit(
       { label: "1일 평균임금", amount: roundWon(averageDailyWage), unit: "원", kind: "info" },
       { label: "평균임금의 60%", amount: roundWon(rawDailyBenefit), unit: "원", kind: "subtotal" },
       { label: "1일 하한액", amount: dailyLower, unit: "원", kind: "info" },
-      {
-        label: "1일 상한액",
-        amount: POLICY_2026.unemployment.dailyUpper,
-        unit: "원",
-        kind: "info",
-      },
+      ...(dailyUpper === null
+        ? []
+        : [{ label: "1일 상한액", amount: dailyUpper, unit: "원" as const, kind: "info" as const }]),
       { label: "소정급여일수", amount: benefitDays, unit: "일", kind: "info" },
       { label: "총 예상 구직급여", amount: totalBenefit, unit: "원", kind: "total" },
     ],
     assumptions: [
       "퇴직 전 3개월 임금총액을 월평균임금×3으로 근사했습니다.",
-      "하한액은 2026년 최저임금×80%×1일 소정근로시간으로 계산했습니다.",
+      `하한액은 ${policy.year}년 최저임금×80%×1일 소정근로시간으로 계산했습니다.`,
       "50세 이상 구분에는 장애인이 포함되는 것으로 가정합니다.",
     ],
     warnings: unique(warnings),
@@ -765,6 +790,7 @@ export function calculateWeeklyHolidayPay(
   });
   assertBoolean(input.attendedAllDays, "소정근로일 개근 여부");
 
+  const policy = policyForYear(input.year ?? 2026);
   const eligible = input.weeklyHours >= 15 && input.attendedAllDays;
   const paidHours = eligible ? Math.min((input.weeklyHours / 40) * 8, 8) : 0;
   const weeklyPay = roundWon(input.hourlyWage * paidHours);
@@ -775,8 +801,8 @@ export function calculateWeeklyHolidayPay(
   } else if (!input.attendedAllDays) {
     warnings.push("소정근로일을 개근하지 않은 것으로 입력되어 주휴수당을 0원으로 계산했습니다.");
   }
-  if (input.hourlyWage < POLICY_2026.minimumWage.hourly) {
-    warnings.push(`입력 시급이 2026년 최저임금 ${POLICY_2026.minimumWage.hourly.toLocaleString("ko-KR")}원보다 낮습니다.`);
+  if (input.hourlyWage < policy.minimumWage.hourly) {
+    warnings.push(`입력 시급이 ${policy.year}년 최저임금 ${policy.minimumWage.hourly.toLocaleString("ko-KR")}원보다 낮습니다.`);
   }
 
   return {
@@ -864,4 +890,5 @@ export function calculateShutdownAllowance(
   };
 }
 
-export { POLICY_2026, POLICY_VERSION };
+export { POLICY_2026, POLICY_2027, POLICY_VERSION };
+export type { LaborPolicy, PolicyYear };

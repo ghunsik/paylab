@@ -15,6 +15,7 @@ const PAGEVIEW_PATHS = new Set([
   "/privacy",
   "/terms",
   "/calculators/salary",
+  "/calculators/year-end-tax",
   "/calculators/hourly",
   "/calculators/severance",
   "/calculators/unemployment",

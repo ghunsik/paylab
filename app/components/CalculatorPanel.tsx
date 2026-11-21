@@ -10,15 +10,23 @@ import {
   calculateUnemploymentBenefit,
   calculateWeeklyHolidayPay,
 } from "@/lib/calculations";
+import { FIRST_SUPPORTED_MONTH, LAST_SUPPORTED_MONTH, type PolicyYear } from "@/lib/policy";
+import { calculateYearEndTax, estimateAnnualInsurance } from "@/lib/year-end-tax";
 import { recordAnonymousMetric } from "@/app/components/AnonymousAnalytics";
-import { calculatorBySlug, type CalculatorSlug } from "@/lib/site-content";
+import type { CalculatorSlug } from "@/lib/site-content";
 
 type ResultLike = {
-  primary: { label: string; amount: number; unit: "원" | "일" | "시간" | "%" | "개월" | "년" };
+  primary: {
+    label: string;
+    amount: number;
+    unit: "원" | "일" | "시간" | "%" | "개월" | "년";
+    note?: string;
+  };
   rows: Array<{
     label: string;
     amount: number;
     unit: "원" | "일" | "시간" | "%" | "개월" | "년";
+    kind?: "income" | "deduction" | "subtotal" | "total" | "info";
     note?: string;
   }>;
   assumptions: string[];
@@ -42,6 +50,51 @@ const formatMoneyInput = (value: string) => {
   return digits ? Number(digits).toLocaleString("ko-KR") : "";
 };
 
+/** 오늘 날짜가 지원 범위 안이면 그 달을, 아니면 범위의 끝을 기본값으로 쓴다. */
+function defaultMonth(): string {
+  const now = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  if (month < FIRST_SUPPORTED_MONTH) return FIRST_SUPPORTED_MONTH;
+  if (month > LAST_SUPPORTED_MONTH) return LAST_SUPPORTED_MONTH;
+  return month;
+}
+
+function defaultYear(): PolicyYear {
+  return new Date().getFullYear() >= 2027 ? 2027 : 2026;
+}
+
+function todayIso(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+function YearField({
+  id,
+  label,
+  value,
+  onChange,
+  help,
+}: {
+  id: string;
+  label: string;
+  value: PolicyYear;
+  onChange: (value: PolicyYear) => void;
+  help?: string;
+}) {
+  return (
+    <SelectField
+      id={id}
+      label={label}
+      value={String(value)}
+      onChange={(next) => onChange(Number(next) as PolicyYear)}
+      help={help}
+    >
+      <option value="2026">2026년</option>
+      <option value="2027">2027년</option>
+    </SelectField>
+  );
+}
+
 function MoneyField({
   id,
   label,
@@ -63,7 +116,7 @@ function MoneyField({
   return (
     <div className="field-group">
       <label htmlFor={id}>{label}</label>
-      <div className="money-input-wrap">
+      <div className="unit-input">
         <input
           id={id}
           value={value}
@@ -146,7 +199,7 @@ function NumberField({
   return (
     <div className="field-group">
       <label htmlFor={id}>{label}</label>
-      <div className="money-input-wrap plain-number-wrap">
+      <div className="unit-input">
         <input
           id={id}
           type="number"
@@ -176,6 +229,8 @@ function DateField({
   onChange,
   help,
   type = "date",
+  min,
+  max,
 }: {
   id: string;
   label: string;
@@ -183,6 +238,8 @@ function DateField({
   onChange: (value: string) => void;
   help?: string;
   type?: "date" | "month";
+  min?: string;
+  max?: string;
 }) {
   const helpId = help ? `${id}-help` : undefined;
   return (
@@ -194,6 +251,8 @@ function DateField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-describedby={helpId}
+        min={min}
+        max={max}
         required
       />
       {help ? (
@@ -237,53 +296,33 @@ function CheckField({
 function ResultPanel({
   result,
   resultRef,
-  error,
 }: {
   result: ResultLike | null;
   resultRef: RefObject<HTMLHeadingElement | null>;
-  error: string;
 }) {
   if (!result) {
     return (
-      <aside className="result-panel result-primer" aria-label="계산 전 안내">
-        <div className="primer-index">PAYLAB / VERIFIED</div>
-        <h2>숫자만큼 근거도 선명하게</h2>
-        <p>
-          계산 후에는 예상 금액과 함께 사용한 요율, 상·하한, 포함하지 않은 조건을
-          한 화면에서 확인할 수 있습니다.
-        </p>
-        <ul className="primer-list">
-          <li>입력값은 서버에 저장하지 않음</li>
-          <li>기준일이 있는 정책은 적용 월 반영</li>
-          <li>공식 자료와 계산 가정 공개</li>
-        </ul>
-        {error ? (
-          <p className="form-error" role="alert">
-            {error}
-          </p>
-        ) : null}
+      <aside className="result result-empty" aria-label="계산 결과">
+        <strong>결과가 여기에 나옵니다</strong>
+        <p>값을 넣고 계산하기를 누르면 금액과 항목별 내역, 계산에 쓴 가정을 보여줍니다.</p>
       </aside>
     );
   }
 
-  const primaryValue = formatResultValue(result.primary.amount, result.primary.unit);
-
   return (
-    <aside className="result-panel result-ready" aria-live="polite">
-      <div className="result-topline">
-        <span>예상 결과</span>
-        <span>{result.policyVersion}</span>
-      </div>
+    <aside className="result" aria-live="polite">
       <h2 ref={resultRef} tabIndex={-1}>
         {result.primary.label}
       </h2>
-      <div className="result-primary">{primaryValue}</div>
-      <div className="result-rule" aria-hidden="true" />
+      <p className="result-amount">
+        <span>{formatResultValue(result.primary.amount, result.primary.unit)}</span>
+      </p>
+      {result.primary.note ? <p className="result-sub">{result.primary.note}</p> : null}
       <table className="result-table">
-        <caption>계산 결과 상세</caption>
+        <caption>계산 내역</caption>
         <tbody>
           {result.rows.map((row, index) => (
-            <tr key={`${row.label}-${index}`}>
+            <tr key={`${row.label}-${index}`} className={row.kind ? `row-${row.kind}` : undefined}>
               <th scope="row">{row.label}</th>
               <td>
                 {formatResultValue(row.amount, row.unit)}
@@ -296,7 +335,7 @@ function ResultPanel({
 
       {result.warnings.length ? (
         <div className="result-warning">
-          <strong>확인해 주세요</strong>
+          <strong>확인할 점</strong>
           <ul>
             {result.warnings.map((warning) => (
               <li key={warning}>{warning}</li>
@@ -306,25 +345,25 @@ function ResultPanel({
       ) : null}
 
       <details className="assumptions">
-        <summary>계산에 사용한 가정</summary>
+        <summary>이 계산에 쓴 가정 보기</summary>
         <ul>
           {result.assumptions.map((assumption) => (
             <li key={assumption}>{assumption}</li>
           ))}
         </ul>
       </details>
+      <p className="result-version">기준 데이터 {result.policyVersion}</p>
     </aside>
   );
 }
 
 function CalculatorFrame({
-  slug,
   children,
   onSubmit,
   result,
   resultRef,
   error,
-  compact,
+  submitLabel = "계산하기",
 }: {
   slug: CalculatorSlug;
   children: ReactNode;
@@ -333,32 +372,23 @@ function CalculatorFrame({
   resultRef: RefObject<HTMLHeadingElement | null>;
   error: string;
   compact?: boolean;
+  submitLabel?: string;
 }) {
-  const meta = calculatorBySlug[slug];
   return (
-    <div className={`calculator-workspace${compact ? " calculator-workspace-compact" : ""}`}>
-      <form className="calculator-form" onSubmit={onSubmit} noValidate={false}>
-        <div className="form-heading">
-          <span>{meta.index} / {meta.group}</span>
-          <h2>{meta.question}</h2>
-          <p>{meta.description}</p>
-        </div>
-        <div className="form-fields">{children}</div>
+    <div className="calc">
+      <form className="calc-form" onSubmit={onSubmit}>
+        <div className="calc-fields">{children}</div>
         {error ? (
-          <p className="form-error mobile-only-error" role="alert">
+          <p className="form-error" role="alert">
             {error}
           </p>
         ) : null}
-        <button className="calculate-button" type="submit">
-          계산하기
-          <span aria-hidden="true">→</span>
+        <button className="calc-button" type="submit">
+          {submitLabel}
         </button>
-        <p className="privacy-note">
-          <span className="status-dot" aria-hidden="true" /> 입력값은 이 브라우저 안에서만
-          계산됩니다.
-        </p>
+        <p className="calc-note">입력한 값은 이 브라우저 안에서만 계산하고 저장하지 않습니다.</p>
       </form>
-      <ResultPanel result={result} resultRef={resultRef} error={error} />
+      <ResultPanel result={result} resultRef={resultRef} />
     </div>
   );
 }
@@ -390,7 +420,7 @@ function SalaryCalculator({ compact }: { compact?: boolean }) {
   const [nonTaxable, setNonTaxable] = useState("0");
   const [dependents, setDependents] = useState("1");
   const [children, setChildren] = useState("0");
-  const [effectiveMonth, setEffectiveMonth] = useState("2026-07");
+  const [effectiveMonth, setEffectiveMonth] = useState(defaultMonth);
   const state = useCalculatorResult("salary");
 
   return (
@@ -414,7 +444,7 @@ function SalaryCalculator({ compact }: { compact?: boolean }) {
         );
       }}
     >
-      <div className="segmented-control" aria-label="급여 입력 기준">
+      <div className="toggle" role="group" aria-label="급여 입력 기준">
         <button
           type="button"
           className={basis === "monthly" ? "active" : ""}
@@ -453,7 +483,9 @@ function SalaryCalculator({ compact }: { compact?: boolean }) {
           label="급여 귀속월"
           value={effectiveMonth}
           onChange={setEffectiveMonth}
-          help="국민연금 상·하한이 7월부터 달라집니다."
+          min={FIRST_SUPPORTED_MONTH}
+          max={LAST_SUPPORTED_MONTH}
+          help="2027년 1월부터 국민연금·장기요양보험료율이 오릅니다."
         />
       </div>
       <div className="field-grid">
@@ -487,11 +519,305 @@ function SalaryCalculator({ compact }: { compact?: boolean }) {
   );
 }
 
+function YearEndTaxCalculator() {
+  const [salary, setSalary] = useState("45,000,000");
+  const [withheld, setWithheld] = useState("");
+  const [dependents, setDependents] = useState("1");
+  const [childrenAll, setChildrenAll] = useState("0");
+  const [children, setChildren] = useState("0");
+  const [seniors, setSeniors] = useState("0");
+  const [disabled, setDisabled] = useState("0");
+  const [married, setMarried] = useState(false);
+  const [autoInsurance, setAutoInsurance] = useState(true);
+  const [pension, setPension] = useState("");
+  const [insurance, setInsurance] = useState("");
+  const [creditCard, setCreditCard] = useState("");
+  const [debit, setDebit] = useState("");
+  const [market, setMarket] = useState("");
+  const [medicalSelf, setMedicalSelf] = useState("");
+  const [medicalFamily, setMedicalFamily] = useState("");
+  const [education, setEducation] = useState("");
+  const [protection, setProtection] = useState("");
+  const [donation, setDonation] = useState("");
+  const [hometown, setHometown] = useState("");
+  const [rent, setRent] = useState("");
+  const [pensionSavings, setPensionSavings] = useState("");
+  const [irp, setIrp] = useState("");
+  const [subscription, setSubscription] = useState("");
+  const [loan, setLoan] = useState("");
+  const state = useCalculatorResult("year-end-tax");
+
+  const counts = (maximum: number) =>
+    Array.from({ length: maximum + 1 }, (_, value) => (
+      <option key={value} value={value}>
+        {value === 0 ? "없음" : `${value}명`}
+      </option>
+    ));
+
+  return (
+    <CalculatorFrame
+      slug="year-end-tax"
+      result={state.result}
+      resultRef={state.resultRef}
+      error={state.error}
+      onSubmit={(event) => {
+        event.preventDefault();
+        state.run(() => {
+          const totalSalary = numberFromInput(salary);
+          const estimated = estimateAnnualInsurance(totalSalary);
+          return calculateYearEndTax({
+            totalSalary,
+            withheldIncomeTax: withheld.trim() ? numberFromInput(withheld) : undefined,
+            dependents: Number(dependents),
+            childrenAll: Number(childrenAll),
+            children: Number(children),
+            seniors: Number(seniors),
+            disabled: Number(disabled),
+            marriedThisYear: married,
+            nationalPension: autoInsurance ? estimated.nationalPension : numberFromInput(pension),
+            healthAndEmploymentInsurance: autoInsurance
+              ? estimated.healthAndEmploymentInsurance
+              : numberFromInput(insurance),
+            creditCard: numberFromInput(creditCard),
+            debitAndCash: numberFromInput(debit),
+            marketAndTransit: numberFromInput(market),
+            medicalSelf: numberFromInput(medicalSelf),
+            medicalFamily: numberFromInput(medicalFamily),
+            education: numberFromInput(education),
+            protectionInsurance: numberFromInput(protection),
+            donation: numberFromInput(donation),
+            hometownDonation: numberFromInput(hometown),
+            monthlyRent: numberFromInput(rent),
+            pensionSavings: numberFromInput(pensionSavings),
+            irp: numberFromInput(irp),
+            housingSubscription: numberFromInput(subscription),
+            housingLoanRepayment: numberFromInput(loan),
+          });
+        });
+      }}
+    >
+      <MoneyField
+        id="yearend-salary"
+        label="2026년 총급여"
+        value={salary}
+        onChange={setSalary}
+        help="1년 동안 받은 세전 급여에서 비과세(식대 등)를 뺀 금액입니다."
+      />
+      <MoneyField
+        id="yearend-withheld"
+        label="이미 낸 소득세 (선택)"
+        value={withheld}
+        onChange={setWithheld}
+        required={false}
+        help="급여명세서의 소득세를 1~12월 합한 금액입니다. 지방소득세는 빼고 넣으세요. 비워 두면 결정세액만 계산합니다."
+      />
+
+      <div className="field-section">
+        <h3>가족</h3>
+        <div className="calc-fields">
+          <div className="field-grid">
+            <SelectField
+              id="yearend-dependents"
+              label="기본공제 인원"
+              value={dependents}
+              onChange={setDependents}
+              help="본인을 포함해 내가 공제받는 가족 수"
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((value) => (
+                <option key={value} value={value}>
+                  {value}명
+                </option>
+              ))}
+            </SelectField>
+            <SelectField
+              id="yearend-children-all"
+              label="그중 자녀 (20세 이하)"
+              value={childrenAll}
+              onChange={setChildrenAll}
+              help="카드 공제 한도가 자녀 수만큼 늘어납니다."
+            >
+              {counts(5)}
+            </SelectField>
+          </div>
+          <SelectField
+            id="yearend-children"
+            label="자녀 중 2016년 이전에 태어난 자녀"
+            value={children}
+            onChange={setChildren}
+            help="2026년 귀속 자녀세액공제 대상입니다. 2017년 이후 출생 자녀는 아동수당을 받는 동안 제외됩니다."
+          >
+            {counts(5)}
+          </SelectField>
+          <details className="more-fields">
+            <summary>70세 이상·장애인 가족, 올해 결혼</summary>
+            <div className="calc-fields">
+              <div className="field-grid">
+                <SelectField id="yearend-seniors" label="70세 이상" value={seniors} onChange={setSeniors}>
+                  {counts(4)}
+                </SelectField>
+                <SelectField id="yearend-disabled" label="장애인" value={disabled} onChange={setDisabled}>
+                  {counts(4)}
+                </SelectField>
+              </div>
+              <CheckField
+                id="yearend-married"
+                checked={married}
+                onChange={setMarried}
+                label="2026년에 혼인신고를 했어요"
+                help="결혼 세액공제 50만원(생애 한 번)을 적용합니다."
+              />
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div className="field-section">
+        <h3>4대보험료</h3>
+        <div className="calc-fields">
+          <CheckField
+            id="yearend-auto-insurance"
+            checked={autoInsurance}
+            onChange={setAutoInsurance}
+            label="총급여로 자동 계산"
+            help="정확한 금액을 알면 체크를 풀고 직접 넣으세요."
+          />
+          {autoInsurance ? null : (
+            <div className="field-grid">
+              <MoneyField
+                id="yearend-pension"
+                label="국민연금 (연간)"
+                value={pension}
+                onChange={setPension}
+                required={false}
+              />
+              <MoneyField
+                id="yearend-insurance"
+                label="건강·장기요양·고용보험 (연간)"
+                value={insurance}
+                onChange={setInsurance}
+                required={false}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="field-section">
+        <h3>카드·현금영수증</h3>
+        <p>1년 사용액을 수단별로 나눠 넣으세요. 홈택스 연말정산 미리보기에서 확인할 수 있습니다.</p>
+        <div className="calc-fields">
+          <MoneyField id="yearend-credit" label="신용카드" value={creditCard} onChange={setCreditCard} required={false} />
+          <div className="field-grid">
+            <MoneyField id="yearend-debit" label="체크카드·현금영수증" value={debit} onChange={setDebit} required={false} />
+            <MoneyField id="yearend-market" label="전통시장·대중교통" value={market} onChange={setMarket} required={false} />
+          </div>
+        </div>
+      </div>
+
+      <details className="more-fields">
+        <summary>의료비·교육비·보험료·기부금</summary>
+        <div className="calc-fields">
+          <div className="field-grid">
+            <MoneyField
+              id="yearend-medical-self"
+              label="의료비: 본인·65세 이상·장애인"
+              value={medicalSelf}
+              onChange={setMedicalSelf}
+              required={false}
+              help="실손보험금으로 돌려받은 금액은 빼고 넣으세요."
+            />
+            <MoneyField
+              id="yearend-medical-family"
+              label="의료비: 그 밖의 가족"
+              value={medicalFamily}
+              onChange={setMedicalFamily}
+              required={false}
+              help="연 700만원까지만 공제됩니다."
+            />
+          </div>
+          <div className="field-grid">
+            <MoneyField
+              id="yearend-education"
+              label="교육비"
+              value={education}
+              onChange={setEducation}
+              required={false}
+              help="자녀는 1명당 초중고 300만원, 대학 900만원까지만 넣으세요."
+            />
+            <MoneyField
+              id="yearend-protection"
+              label="보장성 보험료"
+              value={protection}
+              onChange={setProtection}
+              required={false}
+              help="연 100만원까지 공제됩니다."
+            />
+          </div>
+          <div className="field-grid">
+            <MoneyField id="yearend-donation" label="기부금" value={donation} onChange={setDonation} required={false} />
+            <MoneyField id="yearend-hometown" label="고향사랑기부금" value={hometown} onChange={setHometown} required={false} />
+          </div>
+        </div>
+      </details>
+
+      <details className="more-fields">
+        <summary>월세·전세대출·청약·연금저축</summary>
+        <div className="calc-fields">
+          <MoneyField
+            id="yearend-rent"
+            label="월세 (1년 합계)"
+            value={rent}
+            onChange={setRent}
+            required={false}
+            help="무주택 세대주이고 총급여 8,000만원 이하일 때 연 1,000만원까지 공제됩니다."
+          />
+          <div className="field-grid">
+            <MoneyField
+              id="yearend-loan"
+              label="전세대출 원리금 상환액"
+              value={loan}
+              onChange={setLoan}
+              required={false}
+            />
+            <MoneyField
+              id="yearend-subscription"
+              label="주택청약 납입액"
+              value={subscription}
+              onChange={setSubscription}
+              required={false}
+              help="총급여 7,000만원 이하 무주택 세대주"
+            />
+          </div>
+          <div className="field-grid">
+            <MoneyField
+              id="yearend-pension-savings"
+              label="연금저축 납입액"
+              value={pensionSavings}
+              onChange={setPensionSavings}
+              required={false}
+              help="연 600만원까지"
+            />
+            <MoneyField
+              id="yearend-irp"
+              label="IRP 납입액"
+              value={irp}
+              onChange={setIrp}
+              required={false}
+              help="연금저축과 합쳐 900만원까지"
+            />
+          </div>
+        </div>
+      </details>
+    </CalculatorFrame>
+  );
+}
+
 function HourlyCalculator() {
   const [hourlyWage, setHourlyWage] = useState("10,320");
   const [weeklyHours, setWeeklyHours] = useState("40");
   const [workdays, setWorkdays] = useState("5");
   const [attended, setAttended] = useState(true);
+  const [year, setYear] = useState<PolicyYear>(defaultYear);
   const state = useCalculatorResult("hourly");
 
   return (
@@ -508,11 +834,21 @@ function HourlyCalculator() {
             weeklyHours: Number(weeklyHours),
             workdaysPerWeek: Number(workdays),
             attendedAllDays: attended,
+            year,
           }),
         );
       }}
     >
-      <MoneyField id="hourly-wage" label="시급" value={hourlyWage} onChange={setHourlyWage} />
+      <div className="field-grid">
+        <MoneyField id="hourly-wage" label="시급" value={hourlyWage} onChange={setHourlyWage} />
+        <YearField
+          id="hourly-year"
+          label="적용 연도"
+          value={year}
+          onChange={setYear}
+          help="이 연도의 최저임금과 비교합니다."
+        />
+      </div>
       <div className="field-grid">
         <NumberField
           id="hourly-hours"
@@ -546,7 +882,7 @@ function HourlyCalculator() {
 
 function SeveranceCalculator() {
   const [hireDate, setHireDate] = useState("2024-01-01");
-  const [retirementDate, setRetirementDate] = useState("2026-07-01");
+  const [retirementDate, setRetirementDate] = useState(todayIso);
   const [wages, setWages] = useState("10,500,000");
   const [bonus, setBonus] = useState("0");
   const [leaveAllowance, setLeaveAllowance] = useState("0");
@@ -601,8 +937,8 @@ function SeveranceCalculator() {
           onChange={setLeaveAllowance}
         />
       </div>
-      <details className="advanced-fields">
-        <summary>고급 조건</summary>
+      <details className="more-fields">
+        <summary>통상임금·근로시간 직접 입력</summary>
         <div className="field-grid">
           <MoneyField
             id="severance-ordinary"
@@ -633,6 +969,7 @@ function UnemploymentCalculator() {
   const [dailyHours, setDailyHours] = useState("8");
   const [ageGroup, setAgeGroup] = useState<"under50" | "over50">("under50");
   const [period, setPeriod] = useState<"under1" | "1to3" | "3to5" | "5to10" | "over10">("1to3");
+  const [separationYear, setSeparationYear] = useState<PolicyYear>(defaultYear);
   const state = useCalculatorResult("unemployment");
 
   return (
@@ -650,11 +987,21 @@ function UnemploymentCalculator() {
             dailyHours: Number(dailyHours),
             ageGroup,
             insuredPeriod: period,
+            separationYear,
           }),
         );
       }}
     >
-      <MoneyField id="unemployment-wage" label="퇴직 전 월평균 임금" value={wage} onChange={setWage} />
+      <div className="field-grid">
+        <MoneyField id="unemployment-wage" label="퇴직 전 월평균 임금" value={wage} onChange={setWage} />
+        <YearField
+          id="unemployment-year"
+          label="퇴사한 연도"
+          value={separationYear}
+          onChange={setSeparationYear}
+          help="상한액과 하한액이 연도마다 다릅니다."
+        />
+      </div>
       <div className="field-grid">
         <NumberField
           id="unemployment-days"
@@ -695,7 +1042,7 @@ function UnemploymentCalculator() {
 
 function AnnualLeaveCalculator() {
   const [hireDate, setHireDate] = useState("2025-07-01");
-  const [asOfDate, setAsOfDate] = useState("2026-07-11");
+  const [asOfDate, setAsOfDate] = useState(todayIso);
   const [fivePlus, setFivePlus] = useState(true);
   const [weeklyHours, setWeeklyHours] = useState("40");
   const [attendance, setAttendance] = useState("100");
@@ -767,6 +1114,7 @@ function WeeklyHolidayCalculator() {
   const [wage, setWage] = useState("10,320");
   const [hours, setHours] = useState("20");
   const [attended, setAttended] = useState(true);
+  const [year, setYear] = useState<PolicyYear>(defaultYear);
   const state = useCalculatorResult("weekly-holiday");
 
   return (
@@ -782,11 +1130,21 @@ function WeeklyHolidayCalculator() {
             hourlyWage: numberFromInput(wage),
             weeklyHours: Number(hours),
             attendedAllDays: attended,
+            year,
           }),
         );
       }}
     >
-      <MoneyField id="weekly-wage" label="시급" value={wage} onChange={setWage} />
+      <div className="field-grid">
+        <MoneyField id="weekly-wage" label="시급" value={wage} onChange={setWage} />
+        <YearField
+          id="weekly-year"
+          label="적용 연도"
+          value={year}
+          onChange={setYear}
+          help="이 연도의 최저임금과 비교합니다."
+        />
+      </div>
       <NumberField
         id="weekly-hours"
         label="주 소정근로시간"
@@ -864,6 +1222,8 @@ export function CalculatorPanel({
   switch (slug) {
     case "salary":
       return <SalaryCalculator compact={compact} />;
+    case "year-end-tax":
+      return <YearEndTaxCalculator />;
     case "hourly":
       return <HourlyCalculator />;
     case "severance":

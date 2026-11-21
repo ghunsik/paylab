@@ -33,7 +33,7 @@ export default async function AnalyticsPage() {
       <main id="main-content" className={`${styles.page} section-shell`}>
         <header className={styles.hero}>
           <div>
-            <span className="section-kicker">OWNER / ANALYTICS</span>
+            <span>운영자 전용</span>
             <h1>이용 현황</h1>
             <p>
               최근 {dashboard.periodDays}일의 페이지 조회와 계산 완료 횟수입니다.
