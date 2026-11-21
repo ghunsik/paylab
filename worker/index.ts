@@ -9,9 +9,8 @@ import {
   responseWithSecurityHeaders,
 } from "./security";
 
-interface Env {
+interface Env extends Cloudflare.Env {
   ASSETS: Fetcher;
-  DB: D1Database;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
